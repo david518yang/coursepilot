@@ -1,0 +1,24 @@
+CMSI 4071 Fall 2024
+Project Proposal Feedback
+Project: coursepilot
+=========================
+Proposal Document [2 points]:
+Nice work here.  I like that you break things down into segments which make
+it easy to see just what the goals and features are.  The tech stack looks
+like there are a few 'moving pieces', but I think it's manageable.
+
+Next step here would be to discuss the features you have presented, see if
+you can determine which are most important to a 'successful' development,
+and prioritize your work for the semester to insure those high-priority
+items get built and tested.
+
+Proposal Presentation [3 points]:
+Using AI for note-taking is a good idea.  Seems a novel approach to using
+AI to learn rather than to cheat.  GOOD ON YA!
+
+
+Summary:
+--------
+Total:  5% out of 5% for this deliverable.
+
+Nice job overall!  You're rockin' it so far ~ keep going!

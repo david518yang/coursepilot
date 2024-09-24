@@ -10,6 +10,12 @@
   .text-balance {
     text-wrap: balance;
   }
+  .prose ul,
+  .prose ol,
+  .prose li,
+  .prose p {
+    margin: 0;
+  }
 }
 
 @layer base {
@@ -76,4 +82,3 @@
     @apply bg-background text-foreground;
   }
 }
-

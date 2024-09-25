@@ -13,7 +13,7 @@ const EditorButton = ({
   return (
     <Button
       className={clsx(
-        "transition all ease-in-out rounded border p-1",
+        "transition all ease-in-out rounded p-1 hover:outline outline-border",
         active ? "bg-blue-500 text-white" : ""
       )}
       onClick={onClick}

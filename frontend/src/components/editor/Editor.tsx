@@ -10,6 +10,7 @@ import Text from "@tiptap/extension-text";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import EditorMenu from "@/components/editor/EditorMenu";
+import Autocomplete from "./extensions/Autocomplete";
 
 const Editor = () => {
   const editor = useEditor({
@@ -23,6 +24,7 @@ const Editor = () => {
       Bold,
       Italic,
       Underline,
+      Autocomplete,
     ],
     editorProps: {
       attributes: {

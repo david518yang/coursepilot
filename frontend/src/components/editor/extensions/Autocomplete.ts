@@ -1,9 +1,35 @@
 import { Extension } from "@tiptap/react";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { clear } from "console";
 
 const AUTOCOMPLETE_PLUGIN_KEY = new PluginKey("autocomplete");
 const AUTOCOMPLETE_DEBOUNCE_TIME = 1000;
+
+const getAutocompletedText = async (prefix: string) => {
+  const autocompletedText = await fetch("/api/editor/autocomplete", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prefix: prefix }),
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        return { text: "" };
+      }
+    })
+    .then((data) => {
+      return data.text;
+    });
+  return autocompletedText;
+};
+
+const sanitizeText = (text: string) => {
+  return text.replace(/\n$/, "");
+};
 
 const Autocomplete = Extension.create({
   name: "autocomplete",
@@ -11,7 +37,6 @@ const Autocomplete = Extension.create({
   addKeyboardShortcuts() {
     return {
       Tab: () => {
-        console.log("tab");
         if (this.storage.autocompleteSuggestion) {
           this.editor.commands.insertContentAt(
             this.storage.autocompletePosition,
@@ -69,14 +94,15 @@ const Autocomplete = Extension.create({
       this.storage.autocompletePosition = null;
       this.editor.view.dispatch(this.editor.view.state.tr);
     }
-    this.storage.autocompleteDebouncer = setTimeout(() => {
+    this.storage.autocompleteDebouncer = setTimeout(async () => {
       const { state, view } = this.editor;
       const { from } = state.selection;
       const text = this.editor.getText();
       if (text) {
-        const completedText = "completed text"; // fetch from LLM
+        const completedText = await getAutocompletedText(text);
         if (!completedText) return;
-        this.storage.autocompleteSuggestion = completedText;
+        const sanitizedText = sanitizeText(completedText);
+        this.storage.autocompleteSuggestion = sanitizedText;
         this.storage.autocompletePosition = from;
         view.dispatch(view.state.tr);
       }

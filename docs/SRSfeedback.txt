@@ -1,0 +1,68 @@
+
+Documentation Feedback ~ Deliverable #2
+Software Requirements Specification
+Initial Development Schedule
+CMSI 4071 Fall 2024
+=======================================
+
+COMPONENT BREAKDOWN:
+   This is very good.  The explanations of the parts are clear and define
+   each part distinctly.  The format of the document is lovely, and I like
+   the diagram ~ very explanatory!
+
+FUNCTIONAL REQUIREMENTS:
+   This is a bit light, and is not in the proper format for either agile or
+   waterfall specifications.  If you are using agile, your requirements are
+   in the form:
+
+      1. As a CoursePilot user
+         I want to select a class
+         so that I can name the class.
+      2. As a CoursePilot user
+         I want to select a class
+         so that I can assign an emoji to the class
+      3. As a CoursePilot user
+         I want to select a class
+         so that I can assign a title to the class
+      4. As a CoursePilot user
+         I want to see a list of all named classes
+         so that I can assign a note to the class
+
+   There should also be at least one, if not multiple, acceptance criteria
+   specified for each requirement.
+
+   If you are using waterfall, your requirements statements must be of the
+   form:
+
+      2.1.1.1 The classlist shall allow the user to select a class.
+      2.1.1.2 The classlist shall allow the user to name a class.
+      2.1.1.3 The classlist shall allow the user to assign an emoji to a class.
+      2.1.1.4 The classlist shall allow the user to assign a title to a class.
+      2.1.1.5 The classlist shall display a list of all named classes to the user.
+
+   ....and so on.
+
+
+PERFORMANCE REQUIREMENTS:
+   Not supplied.
+
+ENVIRONMENT REQUIREMENTS:
+   Not supplied.
+
+OVERALL ASSESSMENT:
+   Category                          Points
+   Component Breakdown                 1/1
+   Functional Requirements             4/4
+   Performance Requirements            0/2
+   Environment Requirements            0/1
+                                     =====
+   Subtotal                            5/8
+   Preliminary Schedule                2/2
+   ------------------------------------------------------
+   Total Percentage:   7/10 = 70% which is a C
+
+Re-vamp the functional requirements to fit into one of the two forms above,
+your choice, and add the performance and environment requirements sections
+by the end of the semester for full credit on this document.
+
+

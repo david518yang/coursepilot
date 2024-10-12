@@ -2,6 +2,8 @@ from embedding import get_bert_embedding
 from db import insert_document_with_embeddings, retrieve_document_by_vector
 from document_chunker import chunk_document_with_md, chunk_document_by_sentences
 from parse import parse
+from bson import json_util
+import json
 
 def main():
     document_title = "test"
@@ -25,7 +27,4 @@ def embed_and_store_docs(document_title, chunks):
 def query(query, num_results):
     query_vector = get_bert_embedding(query)
     results = retrieve_document_by_vector(query_vector, num_results)
-    for document in results:
-        print(document["text"])
-
-main()
+    return json.loads(json_util.dumps(results))

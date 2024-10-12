@@ -33,6 +33,15 @@ def retrieve_document_by_vector(query_vector, num_results):
         "limit": num_results,
         "index": "vector_index"
     }}
-    results = collection.aggregate([query])
-    return results
+
+    projection = {
+        "$project": {
+            "_id": 0,
+            "text": 1 
+        }
+    }
+
+    results = collection.aggregate([query, projection])
+
+    return [document['text'] for document in results]
 

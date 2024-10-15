@@ -1,9 +1,11 @@
 import { Editor } from '@tiptap/react';
 import EditorButton from './EditorButton';
+import HeadingPicker from './headingPicker/HeadingPicker';
 
 const EditorMenu = ({ editor }: { editor: Editor }) => {
   return (
     <div className='flex flex-row gap-1 p-2 border-b'>
+      <HeadingPicker editor={editor} />
       <EditorButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}>
         <svg
           xmlns='http://www.w3.org/2000/svg'

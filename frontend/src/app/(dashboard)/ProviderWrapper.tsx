@@ -8,7 +8,7 @@ import { SignedIn, UserButton } from '@clerk/nextjs';
 
 export function ProviderWrapper({
   children,
-  initialCourses
+  initialCourses,
 }: {
   children: React.ReactNode;
   initialCourses: ICourseWithNotes[];
@@ -29,4 +29,3 @@ export function ProviderWrapper({
     </CoursesProvider>
   );
 }
-

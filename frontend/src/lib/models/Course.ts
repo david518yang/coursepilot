@@ -15,6 +15,7 @@ export interface ICourseWithNotes extends ICourse {
 }
 
 export interface ICourseDocument extends ICourse, Document {
+  userId: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,21 +24,23 @@ const courseSchema = new mongoose.Schema<ICourseDocument>(
   {
     title: {
       type: String,
-      required: true
+      required: true,
     },
     emoji: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
+    userId: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
-    versionKey: false
+    versionKey: false,
   }
 );
 
-const Course: Model<ICourseDocument> =
-  mongoose.models?.Courses || mongoose.model('Courses', courseSchema);
+const Course: Model<ICourseDocument> = mongoose.models?.Courses || mongoose.model('Courses', courseSchema);
 
 export default Course;
-

@@ -5,16 +5,16 @@ import { Lexend } from 'next/font/google';
 
 const lexend = Lexend({
   subsets: ['latin'],
-  display: 'swap'
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
   title: 'Coursepilot',
-  description: 'Notetaking, accelerated'
+  description: 'Notetaking, accelerated',
 };
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -26,4 +26,3 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
-

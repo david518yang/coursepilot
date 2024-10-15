@@ -23,25 +23,24 @@ const noteSchema = new mongoose.Schema<INoteDocument>(
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     content: {
       type: String,
-      required: true
+      required: true,
     },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Class',
-      required: true
-    }
+      required: true,
+    },
   },
   {
     timestamps: true,
-    versionKey: false
+    versionKey: false,
   }
 );
 
 const Note: Model<INoteDocument> = mongoose.models?.Notes || mongoose.model('Notes', noteSchema);
 
 export default Note;
-

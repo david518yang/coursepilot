@@ -4,10 +4,7 @@ import EditorButton from './EditorButton';
 const EditorMenu = ({ editor }: { editor: Editor }) => {
   return (
     <div className='flex flex-row gap-1 p-2 border-b'>
-      <EditorButton
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        active={editor.isActive('bold')}
-      >
+      <EditorButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}>
         <svg
           xmlns='http://www.w3.org/2000/svg'
           fill='none'
@@ -22,10 +19,7 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
           />
         </svg>
       </EditorButton>
-      <EditorButton
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        active={editor.isActive('italic')}
-      >
+      <EditorButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')}>
         <svg
           xmlns='http://www.w3.org/2000/svg'
           fill='none'
@@ -103,4 +97,3 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
 };
 
 export default EditorMenu;
-

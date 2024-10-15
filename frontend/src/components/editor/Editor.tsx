@@ -2,6 +2,7 @@
 import Bold from '@tiptap/extension-bold';
 import BulletList from '@tiptap/extension-bullet-list';
 import Document from '@tiptap/extension-document';
+import Heading from '@tiptap/extension-heading';
 import Italic from '@tiptap/extension-italic';
 import ListItem from '@tiptap/extension-list-item';
 import OrderedList from '@tiptap/extension-ordered-list';
@@ -14,7 +15,19 @@ import Autocomplete from './extensions/Autocomplete';
 
 const Editor = () => {
   const editor = useEditor({
-    extensions: [Document, Paragraph, Text, ListItem, BulletList, OrderedList, Bold, Italic, Underline, Autocomplete],
+    extensions: [
+      Document,
+      Paragraph,
+      Text,
+      Heading.configure({ levels: [1, 2, 3] }),
+      ListItem,
+      BulletList,
+      OrderedList,
+      Bold,
+      Italic,
+      Underline,
+      Autocomplete,
+    ],
     editorProps: {
       attributes: {
         class: 'prose p-4 m-0 h-full w-full max-w-none focus:outline-none',

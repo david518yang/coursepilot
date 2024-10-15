@@ -4,7 +4,7 @@ import { INoteLean } from '../models/Note';
 
 interface CoursesContextType {
   courses: ICourseWithNotes[];
-  addCourse: (course: ICourseWithNotes) => void;
+  addCourse: (course: string, userId: string) => void;
   updateCourse: (courseId: string, updatedCourse: Partial<ICourseWithNotes>) => void;
   deleteCourse: (courseId: string) => void;
   addNote: (courseId: string, note: INoteLean) => void;
@@ -20,27 +20,92 @@ export const CoursesProvider: React.FC<{
 }> = ({ initialCourses, children }) => {
   const [courses, setCourses] = useState<ICourseWithNotes[]>(initialCourses);
 
-  const addCourse = useCallback((course: ICourseWithNotes) => {
-    setCourses(prevCourses => [...prevCourses, course]);
+  const addCourse = useCallback(async (title: string, emoji: string) => {
+    try {
+      const response = await fetch('/api/courses/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          emoji,
+        }),
+      });
+
+      // Check if the request was successful
+      if (!response.ok) {
+        throw new Error('Failed to add course');
+      }
+
+      // Parse the returned data from the server
+      const newCourse = await response.json();
+
+      // Update the state with the newly added course
+      setCourses(prevCourses => [
+        ...prevCourses,
+        {
+          _id: newCourse._id,
+          title: newCourse.title,
+          emoji: newCourse.emoji,
+          userId: newCourse.userId,
+          createdAt: newCourse.createdAt,
+          updatedAt: newCourse.updatedAt,
+          notes: [],
+        },
+      ]);
+    } catch (error) {
+      console.error('Error adding course:', error);
+    }
   }, []);
 
-  const updateCourse = useCallback((courseId: string, updatedCourse: Partial<ICourseWithNotes>) => {
-    setCourses(prevCourses =>
-      prevCourses.map(course =>
-        course._id === courseId ? { ...course, ...updatedCourse } : course
-      )
-    );
+  const updateCourse = useCallback(async (courseId: string, updatedCourse: Partial<ICourseWithNotes>) => {
+    try {
+      const response = await fetch(`/api/courses/${courseId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedCourse),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to update course:', errorData.error);
+        return;
+      }
+
+      const updatedCourseData = await response.json();
+
+      setCourses(prevCourses =>
+        prevCourses.map(course => (course._id === courseId ? { ...course, ...updatedCourseData.course } : course))
+      );
+    } catch (error) {
+      console.error('Error updating course:', error);
+    }
   }, []);
 
-  const deleteCourse = useCallback((courseId: string) => {
-    setCourses(prevCourses => prevCourses.filter(course => course._id !== courseId));
+  const deleteCourse = useCallback(async (courseId: string) => {
+    try {
+      // Make a DELETE request to the delete API route
+      const response = await fetch(`/api/courses/${courseId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete course');
+      }
+
+      // Optionally, remove the deleted course from your state
+      setCourses(prevCourses => prevCourses.filter(course => course._id !== courseId));
+    } catch (error) {
+      console.error('Error deleting course:', error);
+    }
   }, []);
 
   const addNote = useCallback((courseId: string, note: INoteLean) => {
     setCourses(prevCourses =>
-      prevCourses.map(course =>
-        course._id === courseId ? { ...course, notes: [...course.notes, note] } : course
-      )
+      prevCourses.map(course => (course._id === courseId ? { ...course, notes: [...course.notes, note] } : course))
     );
   }, []);
 
@@ -50,7 +115,7 @@ export const CoursesProvider: React.FC<{
         course._id === courseId
           ? {
               ...course,
-              notes: course.notes.map(note => (note._id === noteId ? { ...note, title } : note))
+              notes: course.notes.map(note => (note._id === noteId ? { ...note, title } : note)),
             }
           : course
       )
@@ -60,9 +125,7 @@ export const CoursesProvider: React.FC<{
   const deleteNote = useCallback((courseId: string, noteId: string) => {
     setCourses(prevCourses =>
       prevCourses.map(course =>
-        course._id === courseId
-          ? { ...course, notes: course.notes.filter(note => note._id !== noteId) }
-          : course
+        course._id === courseId ? { ...course, notes: course.notes.filter(note => note._id !== noteId) } : course
       )
     );
   }, []);
@@ -76,7 +139,7 @@ export const CoursesProvider: React.FC<{
         deleteCourse,
         addNote,
         updateNote,
-        deleteNote
+        deleteNote,
       }}
     >
       {children}
@@ -91,4 +154,3 @@ export const useCoursesContext = () => {
   }
   return context;
 };
-

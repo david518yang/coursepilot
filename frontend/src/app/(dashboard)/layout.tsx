@@ -4,6 +4,7 @@ import Note from '@/lib/models/Note';
 
 import { connectToMongoDB } from '@/lib/db';
 import { ProviderWrapper } from './ProviderWrapper';
+import { redirect } from 'next/navigation';
 
 async function getCoursesFromDb(userId: string): Promise<ICourseWithNotes[]> {
   await connectToMongoDB();
@@ -18,8 +19,8 @@ async function getCoursesFromDb(userId: string): Promise<ICourseWithNotes[]> {
         _id: course._id.toString(),
         notes: notes.map(note => ({
           ...note,
-          _id: note._id.toString()
-        }))
+          _id: note._id.toString(),
+        })),
       };
     })
   )) as ICourseWithNotes[];
@@ -30,10 +31,9 @@ async function getCoursesFromDb(userId: string): Promise<ICourseWithNotes[]> {
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { userId } = auth();
 
-  if (!userId) return;
+  if (!userId) return redirect('/');
 
   const courses = await getCoursesFromDb(userId);
 
   return <ProviderWrapper initialCourses={courses}>{children}</ProviderWrapper>;
 }
-

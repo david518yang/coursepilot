@@ -1,13 +1,7 @@
 'use client';
 
 import { Fragment } from 'react';
-import {
-  Popover,
-  PopoverButton,
-  PopoverPanel,
-  PopoverBackdrop,
-  Transition
-} from '@headlessui/react';
+import { Popover, PopoverButton, PopoverPanel, PopoverBackdrop, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 import { Menu as MenuIcon } from 'lucide-react';
 import clsx from 'clsx';
@@ -22,10 +16,7 @@ export default function PopoverMenu() {
           <PopoverButton className='h-full text-sm font-medium flex items-center justify-center '>
             <MenuIcon
               size={30}
-              className={clsx(
-                'text-zinc-600 hover:text-zinc-400 transition-all',
-                open ? 'rotate-180' : 'w-8'
-              )}
+              className={clsx('text-zinc-600 hover:text-zinc-400 transition-all', open ? 'rotate-180' : 'w-8')}
             />
           </PopoverButton>
           <PopoverBackdrop className='z-[49] fixed w-screen h-screen inset-0 bg-black/50 backdrop-blur-md' />
@@ -55,4 +46,3 @@ export default function PopoverMenu() {
     </Popover>
   );
 }
-

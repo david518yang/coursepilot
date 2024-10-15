@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { CoursesProvider } from "@/lib/hooks/useCourseContext";
-import { ICourseWithNotes } from "@/lib/models/Course";
+import { CoursesProvider } from '@/lib/hooks/useCourseContext';
+import { ICourseWithNotes } from '@/lib/models/Course';
 
-import Sidebar from "@/components/Sidebar";
-import { SignedIn, UserButton } from "@clerk/nextjs";
+import Sidebar from '@/components/Sidebar';
+import { SignedIn, UserButton } from '@clerk/nextjs';
 
 export function ProviderWrapper({
   children,

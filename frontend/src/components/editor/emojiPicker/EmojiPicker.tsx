@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
-const emojis = ["📝", "📚", "💡", "🎯", "📅", "🔍", "✅", "🗂️", "📌"];
+const emojis = ['📝', '📚', '💡', '🎯', '📅', '🔍', '✅', '🗂️', '📌'];
 
 interface EmojiPickerProps {
   onSelect?: (emoji: string) => void;
@@ -16,7 +16,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect }) => {
   const [selectedEmoji, setSelectedEmoji] = useState(emojis[0]);
 
   const handleEmojiSelect = (event: Event) => {
-    const emoji = (event.currentTarget as HTMLElement).textContent || "";
+    const emoji = (event.currentTarget as HTMLElement).textContent || '';
     setSelectedEmoji(emoji);
     if (onSelect) onSelect(emoji);
   };
@@ -33,7 +33,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect }) => {
             onSelect={handleEmojiSelect}
             textValue={emoji}
             className={`flex items-center justify-center ${
-              selectedEmoji === emoji ? "bg-accent" : ""
+              selectedEmoji === emoji ? 'bg-accent' : ''
             }`}
           >
             {emoji}

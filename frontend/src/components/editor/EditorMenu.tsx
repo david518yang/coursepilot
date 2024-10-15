@@ -1,12 +1,12 @@
-import { Editor } from "@tiptap/react";
-import EditorButton from "./EditorButton";
+import { Editor } from '@tiptap/react';
+import EditorButton from './EditorButton';
 
 const EditorMenu = ({ editor }: { editor: Editor }) => {
   return (
     <div className="sticky top-0 z-10 bg-background flex flex-row gap-1 p-2 border-b">
       <EditorButton
         onClick={() => editor.chain().focus().toggleBold().run()}
-        active={editor.isActive("bold")}
+        active={editor.isActive('bold')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +24,7 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
       </EditorButton>
       <EditorButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        active={editor.isActive("italic")}
+        active={editor.isActive('italic')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -43,7 +43,7 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
       </EditorButton>
       <EditorButton
         onClick={() => editor.chain().focus().toggleUnderline().run()}
-        active={editor.isActive("underline")}
+        active={editor.isActive('underline')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +62,7 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
       </EditorButton>
       <EditorButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        active={editor.isActive("bulletList")}
+        active={editor.isActive('bulletList')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +81,7 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
       </EditorButton>
       <EditorButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        active={editor.isActive("orderedList")}
+        active={editor.isActive('orderedList')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

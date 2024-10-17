@@ -30,7 +30,7 @@ const Editor = () => {
     ],
     editorProps: {
       attributes: {
-        class: 'prose p-4 m-0 h-full w-full max-w-none focus:outline-none',
+        class: 'prose p-4 m-0 h-full w-full max-w-none break-all focus:outline-none',
       },
     },
     autofocus: true,

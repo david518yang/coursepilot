@@ -19,7 +19,7 @@ export default function Sidebar() {
   const { courses } = useCoursesContext();
 
   return (
-    <div className='w-64 h-screen bg-background border-r'>
+    <div className='grid grid-cols[1fr_1fr] w-64 h-screen bg-background border-r'>
       <div className='p-4 flex justify-between items-center'>
         <h2 className='text-lg font-semibold'>My Courses</h2>
         <CourseDialog
@@ -31,7 +31,7 @@ export default function Sidebar() {
           editing={false}
         />
       </div>
-      <ScrollArea className='h-[calc(100vh-64px)]'>
+      <ScrollArea className='h-[calc(100vh-100px)]'>
         <Accordion type='multiple' className='w-full'>
           {courses.map(course => (
             <AccordionItem value={course._id} key={course._id}>

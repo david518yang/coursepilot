@@ -13,6 +13,8 @@ def insert_document_with_embeddings(input_data):
     embedding = input_data["embedding"].tolist() if isinstance(input_data["embedding"], numpy.ndarray) else input_data 
 
     document = {
+        "userId": input_data["userId"],
+        "courseId": input_data["courseId"],
         "title": input_data["title"],
         "text": input_data["text"],
         "embedding": embedding

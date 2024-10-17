@@ -3,7 +3,7 @@ from nltk.tokenize import sent_tokenize
 from transformers import BertTokenizer
 import re
 
-# nltk.download('punkt')
+nltk.download('punkt_tab')
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 def chunk_document_by_sentences(text):
     sentences = sent_tokenize(text)

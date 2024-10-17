@@ -1,90 +1,75 @@
 'use client';
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { PencilSquareIcon } from '@heroicons/react/20/solid';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { FileText, FolderClosed, Plus } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import Link from 'next/link';
+import CourseDialog from './editor/CourseDialog';
 
-interface Note {
-  id: string;
-  title: string;
-}
+import clsx from 'clsx';
 
-interface Class {
-  id: string;
-  name: string;
-  notes: Note[];
-}
-
-const classes: Class[] = [
-  {
-    id: 'math101',
-    name: 'Mathematics 101',
-    notes: [
-      { id: 'math1', title: 'Algebra Basics' },
-      { id: 'math2', title: 'Trigonometry Introduction' }
-    ]
-  },
-  {
-    id: 'cs201',
-    name: 'Computer Science 201',
-    notes: [
-      { id: 'cs1', title: 'Data Structures' },
-      { id: 'cs2', title: 'Algorithms' }
-    ]
-  },
-  {
-    id: 'bio301',
-    name: 'Biology 301',
-    notes: [
-      { id: 'bio1', title: 'Cell Structure' },
-      { id: 'bio2', title: 'Genetics Basics' }
-    ]
-  }
-];
+import { useParams } from 'next/navigation';
+import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 
 export default function Sidebar() {
+  const params = useParams<{ courseId: string; noteId: string }>();
+
+  const { courses } = useCoursesContext();
+
   return (
-    <div className='w-64 h-screen bg-background border-r'>
+    <div className='grid grid-cols[1fr_1fr] w-64 h-screen bg-background border-r'>
       <div className='p-4 flex justify-between items-center'>
-        <h2 className='text-lg font-semibold'>My Notes</h2>
-        <Button size='icon' variant='ghost'>
-          <Plus className='h-4 w-4' />
-        </Button>
+        <h2 className='text-lg font-semibold'>My Courses</h2>
+        <CourseDialog
+          trigger={
+            <Button size='icon' variant='ghost'>
+              <Plus className='h-4 w-4' />
+            </Button>
+          }
+          editing={false}
+        />
       </div>
-      <ScrollArea className='h-[calc(100vh-64px)]'>
+      <ScrollArea className='h-[calc(100vh-100px)]'>
         <Accordion type='multiple' className='w-full'>
-          {classes.map(classItem => (
-            <AccordionItem value={classItem.id} key={classItem.id}>
-              <AccordionTrigger className='px-4 py-2 text-sm hover:no-underline hover:bg-muted'>
-                <div className='flex items-center'>
-                  <FolderClosed className='h-4 w-4 mr-2' />
-                  {classItem.name}
+          {courses.map(course => (
+            <AccordionItem value={course._id} key={course._id}>
+              <AccordionTrigger
+                onClick={e => e.stopPropagation()} // This prevents the click from bubbling up to the accordion trigger
+                className={clsx(
+                  'px-4 py-2 text-sm hover:no-underline hover:bg-muted',
+                  course._id === params.courseId && 'bg-muted'
+                )}
+              >
+                <div className='flex items-center justify-between w-full mr-1'>
+                  <div className='flex items-center'>
+                    {<span className='mr-2'>{course.emoji}</span>}
+                    {course.title}
+                  </div>
+                  <CourseDialog
+                    course={course}
+                    editing={true}
+                    trigger={<PencilSquareIcon onClick={e => e.stopPropagation()} className='w-4 h-4' />}
+                  />
                 </div>
               </AccordionTrigger>
               <AccordionContent>
                 <div className='pl-4'>
-                  {classItem.notes.map(note => (
+                  {course.notes.map(note => (
                     <Link
-                      href={`/notes/${classItem.id}/${note.id}`}
-                      key={note.id}
-                      className='flex items-center px-4 py-2 text-sm hover:bg-muted'
+                      href={`/editor/${course._id}/notes/${note._id}`}
+                      key={note._id}
+                      className={clsx(
+                        'flex items-center px-4 py-2 text-sm hover:bg-muted',
+                        params.noteId === note._id && 'bg-muted'
+                      )}
                     >
                       <FileText className='h-4 w-4 mr-2' />
                       {note.title}
                     </Link>
                   ))}
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    className='w-full justify-start px-4 py-2 text-sm'
-                  >
+                  <Button variant='ghost' size='sm' className='w-full justify-start px-4 py-2 text-sm'>
                     <Plus className='h-4 w-4 mr-2' />
                     Add Note
                   </Button>
@@ -97,4 +82,3 @@ export default function Sidebar() {
     </div>
   );
 }
-

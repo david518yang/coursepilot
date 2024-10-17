@@ -1,5 +1,5 @@
 import Editor from '@/components/editor/Editor';
 
-export default function Page() {
+export default async function Page() {
   return <Editor />;
 }

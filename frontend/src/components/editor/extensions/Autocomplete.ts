@@ -3,31 +3,31 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 
 const AUTOCOMPLETE_PLUGIN_KEY = new PluginKey('autocomplete');
-const AUTOCOMPLETE_DEBOUNCE_TIME = 1000;
+const AUTOCOMPLETE_DEBOUNCE_TIME = 500;
 
 const getAutocompletedText = async (prefix: string) => {
-  const autocompletedText = await fetch("/api/editor/autocomplete", {
-    method: "POST",
+  const autocompletedText = await fetch('/api/editor/autocomplete', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ prefix: prefix }),
   })
-    .then((response) => {
+    .then(response => {
       if (response.ok) {
         return response.json();
       } else {
-        return { text: "" };
+        return { text: '' };
       }
     })
-    .then((data) => {
+    .then(data => {
       return data.text;
     });
   return autocompletedText;
 };
 
 const sanitizeText = (text: string) => {
-  return text.replace(/\n$/, "");
+  return text.replace(/\n$/, '');
 };
 
 const Autocomplete = Extension.create({

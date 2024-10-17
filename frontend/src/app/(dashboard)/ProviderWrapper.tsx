@@ -4,7 +4,6 @@ import { CoursesProvider } from '@/lib/hooks/useCourseContext';
 import { ICourseWithNotes } from '@/lib/models/Course';
 
 import Sidebar from '@/components/Sidebar';
-import { SignedIn, UserButton } from '@clerk/nextjs';
 
 export function ProviderWrapper({
   children,
@@ -17,12 +16,7 @@ export function ProviderWrapper({
     <CoursesProvider initialCourses={initialCourses}>
       <div className='h-screen flex'>
         <Sidebar />
-        <div className='flex-1 relative'>
-          <div className='absolute top-2 right-2 z-10'>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </div>
+        <div className='flex-1'>
           <main className='w-full h-full overflow-auto'>{children}</main>
         </div>
       </div>

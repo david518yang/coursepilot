@@ -1,0 +1,32 @@
+
+Documentation Feedback ~ Deliverable #3
+Software Development Plan
+CMSI 4071 Fall 2024
+=======================================
+
+INTRODUCTION/DELIVERABLES SECTION:
+   Wow, this is EXCELLENT work!  Very impressive.
+   Excellent job here, nothing to add.
+
+PROJECT RESOURCES SECTION:
+   Excellent job here, nothing to add.
+
+PROJECT ORGANIZATION SECTION:
+   Excellent job here, nothing to add.
+
+PROJECT SCHEDULE SECTION:
+   Excellent job here, nothing to add.
+
+OVERALL ASSESSMENT:
+   Category                          Points
+   Project Deliverables               1.0
+   Project Resources                  1.0
+   Project Organization               1.0
+   Project Schedule                   2.0
+                                     =====
+   Subtotal                           5.0
+   ------------------------------------------------------
+   Total Percentage:   5.0/5.0 = 100% which is an A-plus
+
+
+

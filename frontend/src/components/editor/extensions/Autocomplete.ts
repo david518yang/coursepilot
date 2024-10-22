@@ -64,7 +64,7 @@ const Autocomplete = Extension.create({
             if (this.storage.autocompletePosition && this.storage.autocompleteSuggestion) {
               const decoration = Decoration.widget(this.storage.autocompletePosition, () => {
                 const span = document.createElement('span');
-                span.textContent = this.storage.autocompleteSuggestion;
+                span.innerHTML = this.storage.autocompleteSuggestion;
                 span.className = 'text-gray-300';
                 return span;
               });

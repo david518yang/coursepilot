@@ -19,7 +19,7 @@ export default function Sidebar() {
   const { courses } = useCoursesContext();
 
   return (
-    <div className='grid grid-cols[1fr_1fr] w-64 h-screen bg-background border-r'>
+    <div className='hidden sm:grid grid-cols[1fr_1fr] w-64 h-screen bg-background border-r'>
       <div className='p-4 flex justify-between items-center'>
         <h2 className='text-lg font-semibold'>My Courses</h2>
         <CourseDialog

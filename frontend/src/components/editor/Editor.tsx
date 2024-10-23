@@ -41,6 +41,7 @@ const Editor = () => {
             </li>
           </ul>
       `,
+    immediatelyRender: false,
   });
 
   if (!editor) return null;

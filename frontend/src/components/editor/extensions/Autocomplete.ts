@@ -3,7 +3,32 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 
 const AUTOCOMPLETE_PLUGIN_KEY = new PluginKey('autocomplete');
-const AUTOCOMPLETE_DEBOUNCE_TIME = 1000;
+const AUTOCOMPLETE_DEBOUNCE_TIME = 500;
+
+const getAutocompletedText = async (prefix: string) => {
+  const autocompletedText = await fetch('/api/editor/autocomplete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ prefix: prefix }),
+  })
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        return { text: '' };
+      }
+    })
+    .then(data => {
+      return data.text;
+    });
+  return autocompletedText;
+};
+
+const sanitizeText = (text: string) => {
+  return text.replace(/\n$/, '');
+};
 
 const Autocomplete = Extension.create({
   name: 'autocomplete',
@@ -11,7 +36,6 @@ const Autocomplete = Extension.create({
   addKeyboardShortcuts() {
     return {
       Tab: () => {
-        console.log('tab');
         if (this.storage.autocompleteSuggestion) {
           this.editor.commands.insertContentAt(this.storage.autocompletePosition, this.storage.autocompleteSuggestion);
           this.storage.autocompleteSuggestion = '';
@@ -40,7 +64,7 @@ const Autocomplete = Extension.create({
             if (this.storage.autocompletePosition && this.storage.autocompleteSuggestion) {
               const decoration = Decoration.widget(this.storage.autocompletePosition, () => {
                 const span = document.createElement('span');
-                span.textContent = this.storage.autocompleteSuggestion;
+                span.innerHTML = this.storage.autocompleteSuggestion;
                 span.className = 'text-gray-300';
                 return span;
               });
@@ -60,14 +84,15 @@ const Autocomplete = Extension.create({
       this.storage.autocompletePosition = null;
       this.editor.view.dispatch(this.editor.view.state.tr);
     }
-    this.storage.autocompleteDebouncer = setTimeout(() => {
+    this.storage.autocompleteDebouncer = setTimeout(async () => {
       const { state, view } = this.editor;
       const { from } = state.selection;
       const text = this.editor.getText();
       if (text) {
-        const completedText = 'completed text'; // fetch from LLM
+        const completedText = await getAutocompletedText(text);
         if (!completedText) return;
-        this.storage.autocompleteSuggestion = completedText;
+        const sanitizedText = sanitizeText(completedText);
+        this.storage.autocompleteSuggestion = sanitizedText;
         this.storage.autocompletePosition = from;
         view.dispatch(view.state.tr);
       }

@@ -5,17 +5,30 @@ const GEN_AI = new GoogleGenerativeAI(process.env.GEMINI_KEY as string);
 const MODEL = GEN_AI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 export async function POST(req: NextRequest) {
-  const { topic, numQuestions = 1 } = await req.json();
-  
-  const PROMPT = `Generate ${numQuestions} quiz question(s) and their answers based on the following topic: ${topic}. 
-Respond only with a JSON array of objects, each with "question" and "answer" fields. 
-Make sure the questions are challenging but clear, and the answers are concise and accurate.`;
+  const { subject, topic, numQuestions, formats } = await req.json();
+  const question_formats = formats
+    .map((format: string, index: number) => (index === formats.length - 1 ? format : `${format}, `))
+    .join('');
+  const PROMPT = `Generate ${numQuestions} quiz question(s) in the formats ${question_formats} and their answers based for the topic ${topic} within the subject ${subject}. 
+Respond with a JSON array of objects ONLY, no other text, each with "question", "answers", and "correct_answer", and "format" fields. 
+Make sure the questions capture the topic within the subject thoroughly, and that the questions are challenging but clear, and the answers are concise and accurate.`;
 
   try {
     const completion = await MODEL.generateContent(PROMPT);
     const generatedContent = completion.response.text();
-    
-    const quizData = JSON.parse(generatedContent);
+    console.log(generatedContent);
+    const parsedContent = JSON.parse(generatedContent);
+
+    const quizData = parsedContent.map((item: any) => ({
+      question: item.question,
+      answers: item.answers,
+      correct_answer: item.correct_answer,
+      format: item.format,
+    }));
+
+    if (quizData.length !== numQuestions) {
+      throw new Error(`Expected ${numQuestions} questions, but received ${quizData.length}`);
+    }
     console.log(quizData);
     return NextResponse.json(quizData);
   } catch (error) {

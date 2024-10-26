@@ -1,8 +1,10 @@
 import { useState } from 'react';
 
-interface QuizQuestion {
+export interface QuizQuestion {
   question: string;
-  answer: string;
+  answers: string[];
+  correct_answer: string;
+  format: string;
 }
 
 const useGenerateQuiz = () => {
@@ -10,7 +12,7 @@ const useGenerateQuiz = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const generateQuiz = async (topic: string, numQuestions: number = 1) => {
+  const generateQuiz = async (subject: string, topic: string, numQuestions: number, formats: string[]) => {
     setIsGenerating(true);
     setError(null);
 
@@ -20,7 +22,7 @@ const useGenerateQuiz = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ topic, numQuestions }),
+        body: JSON.stringify({ subject, topic, numQuestions, formats }),
       });
 
       if (!response.ok) {
@@ -46,4 +48,3 @@ const useGenerateQuiz = () => {
 };
 
 export default useGenerateQuiz;
-

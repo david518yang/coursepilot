@@ -4,7 +4,7 @@ interface SelectAllProps {
   question: string;
   answers: string[];
   selectedAnswers: string[];
-  onMultiAnswerChange: (questionIndex: number, answer: string, isChecked: boolean) => void;
+  onMultiAnswerChange: (answer: string, isChecked: boolean) => void;
   index: number;
 }
 
@@ -18,7 +18,7 @@ const SelectAll: React.FC<SelectAllProps> = ({ question, answers, selectedAnswer
             id={`q${index}-a${answerIndex}`}
             name={`question-${index}`}
             value={answer}
-            onChange={e => onMultiAnswerChange(index, answer, e.target.checked)}
+            onChange={e => onMultiAnswerChange(answer, e.target.checked)}
             className='mr-2'
           />
           <label htmlFor={`q${index}-a${answerIndex}`}>{answer}</label>

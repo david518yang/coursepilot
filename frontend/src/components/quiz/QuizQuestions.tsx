@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { QuizQuestion } from './GenerateQuiz';
 import MultipleChoice from './question_formats/MultipleChoice';
 import SelectAll from './question_formats/SelectAll';
+import TrueFalse from './question_formats/TrueFalse';
+import ShortAnswer from './question_formats/ShortAnswer';
+import FillBlank from './question_formats/FillBlank';
+import Matching from './question_formats/Matching';
 
 interface QuizQuestionsProps {
   questions: QuizQuestion[];
@@ -70,80 +74,37 @@ const QuizQuestions: React.FC<QuizQuestionsProps> = ({ questions }) => {
                 />
               )}
               {item.format === 'true false' && (
-                <div>
-                  {['True', 'False'].map((answer, answerIndex) => (
-                    <div key={answerIndex} className='flex items-center'>
-                      <input
-                        type='radio'
-                        id={`q${index}-a${answerIndex}`}
-                        name={`question-${index}`}
-                        value={answer}
-                        onChange={e => handleAnswerChange(index, e.target.value)}
-                        className='mr-2'
-                      />
-                      <label htmlFor={`q${index}-a${answerIndex}`}>{answer}</label>
-                    </div>
-                  ))}
-                </div>
+                <TrueFalse
+                  question={item.question}
+                  selectedAnswer={userAnswers[index] as string | null}
+                  onTFChange={(answer: string) => handleAnswerChange(index, answer)}
+                  index={index}
+                />
               )}
               {item.format === 'short answer' && (
-                <div>
-                  <input
-                    type='text'
-                    id={`q${index}-answer`}
-                    name={`question-${index}`}
-                    onChange={e => handleAnswerChange(index, e.target.value)}
-                    className='w-full p-2 border rounded'
-                    placeholder='Enter your answer'
-                  />
-                </div>
+                <ShortAnswer
+                  question={item.question}
+                  selectedAnswer={userAnswers[index] as string | null}
+                  onAnswerChange={(answer: string) => handleAnswerChange(index, answer)}
+                  index={index}
+                />
               )}
               {item.format === 'fill in the blank' && (
-                <div>
-                  <input
-                    type='text'
-                    id={`q${index}-answer`}
-                    name={`question-${index}`}
-                    onChange={e => handleFillInBlankChange(index, e.target.value)}
-                    className='w-full p-2 border rounded'
-                    placeholder='Fill in the blank'
-                  />
-                </div>
+                <FillBlank
+                  question={item.question}
+                  selectedAnswer={userAnswers[index] as string | null}
+                  onAnswerChange={(answer: string) => handleFillInBlankChange(index, answer)}
+                  index={index}
+                />
               )}
               {item.format === 'matching' && (
-                <div>
-                  <div className='flex flex-col space-y-4'>
-                    {item.answers.map((answer: string, answerIndex: number) => (
-                      <div key={answerIndex} className='flex items-center space-x-4'>
-                        <div className='flex-1'>
-                          <input
-                            type='text'
-                            id={`q${index}-match${answerIndex}`}
-                            name={`question-${index}-match${answerIndex}`}
-                            onChange={e => handleMatchingChange(index, e.target.value, '')}
-                            className='w-full p-2 border rounded'
-                            placeholder={`Enter match ${answerIndex + 1}`}
-                          />
-                        </div>
-                        <div className='flex-1'>
-                          <select
-                            id={`q${index}-answer${answerIndex}`}
-                            name={`question-${index}-answer${answerIndex}`}
-                            onChange={e => handleMatchingChange(index, '', e.target.value)}
-                            className='w-full p-2 border rounded'
-                          >
-                            <option value=''>Select an answer</option>
-                            {item.answers.map((_, optionIndex) => (
-                              <option key={optionIndex} value={String.fromCharCode(65 + optionIndex)}>
-                                {String.fromCharCode(65 + optionIndex)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <Matching
+                  question={item.question}
+                  answers={item.answers}
+                  selectedAnswer={userAnswers[index] as Record<string, string> | null}
+                  onMatchingChange={(question: string, answer: string) => handleMatchingChange(index, question, answer)}
+                  index={index}
+                />
               )}
             </div>
           </li>

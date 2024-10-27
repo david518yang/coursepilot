@@ -1,12 +1,15 @@
 import { Editor } from '@tiptap/react';
 import EditorButton from './EditorButton';
 import HeadingPicker from './headingPicker/HeadingPicker';
-import { SignedIn, UserButton } from '@clerk/nextjs';
+
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 const EditorMenu = ({ editor }: { editor: Editor }) => {
   return (
     <div className='sticky top-0 z-10 flex flex-row justify-between p-2 border-b bg-background'>
-      <div className='flex gap-1'>
+      <div className='flex gap-1 items-center'>
+        <SidebarTrigger />
+        <div className='w-[1px] h-6 bg-gray-300' />
         <HeadingPicker editor={editor} />
         <EditorButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}>
           <svg
@@ -97,9 +100,6 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
           </svg>
         </EditorButton>
       </div>
-      <SignedIn>
-        <UserButton />
-      </SignedIn>
     </div>
   );
 };

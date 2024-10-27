@@ -1,4 +1,5 @@
 'use client';
+
 import Bold from '@tiptap/extension-bold';
 import BulletList from '@tiptap/extension-bullet-list';
 import Document from '@tiptap/extension-document';
@@ -12,8 +13,36 @@ import Underline from '@tiptap/extension-underline';
 import { EditorContent, useEditor } from '@tiptap/react';
 import EditorMenu from '@/components/editor/EditorMenu';
 import Autocomplete from './extensions/Autocomplete';
+import { useCoursesContext } from '@/lib/hooks/useCourseContext';
+import CourseDialog from '@/components/CourseDialog';
+import { Button } from '@/components/ui/button';
+import { FolderPlusIcon } from '@heroicons/react/20/solid';
+import { INoteDocument } from '@/lib/models/Note';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/utils';
+import { useEffect } from 'react';
 
-const Editor = () => {
+import { debounce } from 'lodash';
+import { useCallback } from 'react';
+
+const Editor = ({ noteId }: { noteId: string }) => {
+  const { courses, selectedCourse } = useCoursesContext();
+
+  const { data: note, isLoading } = useSWR<INoteDocument>(
+    selectedCourse && noteId && `/api/courses/${selectedCourse}/notes/${noteId}`,
+    fetcher
+  );
+
+  const saveNote = async (content: string) => {
+    await fetch(`/api/courses/${note?.courseId}/notes/${note?._id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    });
+  };
+
+  const debouncedSave = useCallback(debounce(saveNote, 500), [note?._id]);
+
   const editor = useEditor({
     extensions: [
       Document,
@@ -34,19 +63,40 @@ const Editor = () => {
       },
     },
     autofocus: true,
-    content: `
-          <ul>
-            <li>
-              <p>This is a list item</p>
-            </li>
-          </ul>
-      `,
+    content: note?.content,
+    onUpdate: ({ editor }) => {
+      const content = editor.getHTML();
+      debouncedSave(content);
+    },
   });
 
-  if (!editor) return null;
+  // Update editor content when `note.content` changes
+  useEffect(() => {
+    if (editor && note?.content) {
+      editor.commands.setContent(note.content);
+    }
+  }, [editor, note?.content]);
+
+  if (isLoading || !editor) return null; // Early return if still loading or no editor instance
+
+  if (!editor || !note) return null;
 
   return (
-    <div className='grid grid-rows-[auto_1fr] h-full w-full'>
+    <div className='relative grid grid-rows-[auto_1fr] h-full w-full'>
+      {courses.length === 0 && (
+        <div className='absolute inset-0 z-[40] flex flex-col items-center justify-center bg-gray-300 bg-opacity-75'>
+          <CourseDialog
+            trigger={
+              <Button className='flex font-normal items-center gap-2.5'>
+                <p>Create your first course</p>
+
+                <FolderPlusIcon className='h-5 w-5' />
+              </Button>
+            }
+            editing={false}
+          />
+        </div>
+      )}
       <EditorMenu editor={editor} />
       <EditorContent editor={editor} />
     </div>

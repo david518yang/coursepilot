@@ -13,30 +13,49 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import EmojiPicker from '@/components/editor/emojiPicker/EmojiPicker';
-import { ICourseWithNotes } from '@/lib/models/Course';
+// import { TrashIcon } from '@heroicons/react/20/solid';
+import { INoteDocument } from '@/lib/models/Note';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/utils';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
-import { TrashIcon } from '@heroicons/react/20/solid';
 
-interface CreateCourseDialogProps {
+interface NoteDialogProps {
   trigger: ReactNode;
   editing: boolean;
-  course?: ICourseWithNotes;
 }
 
-const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({ trigger, editing, course }) => {
-  const { addCourse, updateCourse, deleteCourse } = useCoursesContext();
+const NoteDialog = ({ trigger, editing }: NoteDialogProps) => {
+  const { selectedCourse } = useCoursesContext();
 
-  const [courseName, setCourseName] = useState<string>(course?.title || '');
-  const [selectedEmoji, setSelectedEmoji] = useState<string>(course?.emoji || '📝');
+  const [noteName, setNoteName] = useState<string>('');
   const [dialogIsOpen, setDialogIsOpen] = useState<boolean>(false);
+  const { data: notes, mutate } = useSWR<INoteDocument[]>(
+    selectedCourse ? `/api/courses/${selectedCourse}/notes` : null,
+    fetcher
+  );
 
-  const handleSave = () => {
-    if (editing && course) {
-      updateCourse(course._id, { title: courseName, emoji: selectedEmoji });
-    } else {
-      addCourse(courseName, selectedEmoji);
+  const addNote = async () => {
+    if (!notes) return;
+
+    const res = await fetch(`/api/courses/${selectedCourse}/notes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title: noteName }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to add note');
     }
+
+    const newNote = await res.json();
+
+    mutate([...notes, newNote], false);
+  };
+
+  const handleSave = async () => {
+    await addNote();
     setDialogIsOpen(false);
   };
 
@@ -45,32 +64,30 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({ trigger, editin
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent onClick={e => e.stopPropagation()}>
         <DialogHeader>
-          <DialogTitle>{editing ? 'Edit Course' : 'Create a Course'}</DialogTitle>
+          <DialogTitle>{editing ? 'Edit Note' : 'Create note'}</DialogTitle>
         </DialogHeader>
         <DialogDescription>
-          {editing ? 'Update your course details.' : 'You can always edit your course name in the future.'}
+          {editing ? 'Update your note details.' : 'You can always edit your note name in the future.'}
         </DialogDescription>
         <div className='grid gap-4 py-4'>
           <div className='grid grid-cols-4 items-center gap-4'>
             <Label htmlFor='name' className='text-right'>
-              Course name
+              Note name
             </Label>
             <div className='flex gap-1 col-span-3'>
               <Input
                 id='name'
-                value={courseName}
-                onChange={e => setCourseName(e.target.value)}
-                placeholder='Enter course name...'
+                value={noteName}
+                onChange={e => setNoteName(e.target.value)}
+                placeholder='Enter note name...'
                 className='col-span-3'
               />
-              {/* Implement your own EmojiPicker component */}
-              <EmojiPicker selectedEmoji={selectedEmoji} setSelectedEmoji={setSelectedEmoji} />
             </div>
           </div>
         </div>
         <DialogFooter>
           <div className='flex items-center gap-2'>
-            {editing && course && (
+            {/* {editing && selectedCourseObject && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button onClick={() => {}} variant='destructive' className='mr-auto'>
@@ -79,15 +96,16 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({ trigger, editin
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Delete {course?.title}</DialogTitle>
+                    <DialogTitle>Delete {selectedCourseObject?.title}</DialogTitle>
                   </DialogHeader>
                   <DialogDescription>Are you sure you want to delete this course?</DialogDescription>
                   <DialogFooter>
                     <Button
                       onClick={() => {
-                        if (course) {
-                          deleteCourse(course._id);
+                        if (selectedCourseObject) {
+                          deleteCourse(selectedCourseObject._id);
                           setDialogIsOpen(false);
+                          window.location.href = '/editor';
                         }
                       }}
                       variant='destructive'
@@ -97,9 +115,9 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({ trigger, editin
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            )}
+            )} */}
             <Button onClick={handleSave} type='submit' className='w-full'>
-              {editing ? 'Save Changes' : 'Create Course'}
+              {editing ? 'Save Changes' : 'Create Note'}
             </Button>
           </div>
         </DialogFooter>
@@ -108,4 +126,4 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({ trigger, editin
   );
 };
 
-export default CreateCourseDialog;
+export default NoteDialog;

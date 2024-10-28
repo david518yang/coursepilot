@@ -3,7 +3,18 @@ import mongoose, { Document, Model } from 'mongoose';
 export interface INote {
   title: string;
   courseId: mongoose.Schema.Types.ObjectId;
+  userId: string;
   content: string;
+}
+
+export interface INoteClean {
+  _id: string;
+  title: string;
+  courseId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface INoteLean extends INote {
@@ -27,11 +38,15 @@ const noteSchema = new mongoose.Schema<INoteDocument>(
     },
     content: {
       type: String,
-      required: true,
+      required: false,
     },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Class',
+      required: true,
+    },
+    userId: {
+      type: String,
       required: true,
     },
   },

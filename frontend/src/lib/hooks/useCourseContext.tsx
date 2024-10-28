@@ -3,6 +3,8 @@ import { ICourseWithNotes } from '@/lib/models/Course';
 import { INoteLean } from '../models/Note';
 
 interface CoursesContextType {
+  selectedCourse: string;
+  setSelectedCourse: (courseId: string) => void;
   courses: ICourseWithNotes[];
   addCourse: (course: string, userId: string) => void;
   updateCourse: (courseId: string, updatedCourse: Partial<ICourseWithNotes>) => void;
@@ -19,6 +21,7 @@ export const CoursesProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ initialCourses, children }) => {
   const [courses, setCourses] = useState<ICourseWithNotes[]>(initialCourses);
+  const [selectedCourse, setSelectedCourse] = useState<string>('');
 
   const addCourse = useCallback(async (title: string, emoji: string) => {
     try {
@@ -133,6 +136,8 @@ export const CoursesProvider: React.FC<{
   return (
     <CoursesContext.Provider
       value={{
+        selectedCourse,
+        setSelectedCourse,
         courses,
         addCourse,
         updateCourse,

@@ -35,5 +35,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const courses = await getCoursesFromDb(userId);
 
-  return <ProviderWrapper initialCourses={courses}>{children}</ProviderWrapper>;
+  return (
+    <html>
+      <body>
+        <ProviderWrapper initialCourses={courses}>{children}</ProviderWrapper>;
+      </body>
+    </html>
+  );
 }

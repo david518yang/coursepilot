@@ -9,9 +9,9 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
   return (
     <div className='sticky top-0 z-10 flex flex-row justify-between p-2 border-b bg-background'>
       <div className='flex gap-1 items-center'>
-        <UploadButton />
         <SidebarTrigger />
         <div className='w-[1px] h-6 bg-gray-300' />
+        <UploadButton />
         <HeadingPicker editor={editor} />
         <EditorButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}>
           <svg

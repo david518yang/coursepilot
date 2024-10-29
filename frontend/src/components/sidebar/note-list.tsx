@@ -14,12 +14,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import clsx from 'clsx';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import {
   SidebarGroup,
@@ -49,6 +47,7 @@ export interface SideBarMenuItem {
 }
 
 export function NoteList() {
+  const router = useRouter();
   const pathname = usePathname();
   const { selectedCourse } = useCoursesContext();
 
@@ -89,6 +88,10 @@ export function NoteList() {
         data?.filter(note => note._id !== noteId),
         false
       );
+
+      const newNotes = data?.filter(note => note._id !== noteId);
+
+      router.push(`/editor/${selectedCourse}${newNotes && newNotes[0] ? `/${newNotes[0]._id}` : ''}`);
     } catch (error) {
       console.error(error);
       alert('Failed to delete note');
@@ -114,7 +117,7 @@ export function NoteList() {
               <div className={clsx('flex items-center w-full h-min', item.isActive && 'bg-sidebar-accent')}>
                 <Link
                   href={item.url}
-                  onClick={e => {
+                  onClick={() => {
                     item.isActive = true;
                   }}
                   prefetch={false}
@@ -169,7 +172,6 @@ export function NoteList() {
                               onClick={() => {
                                 deleteNote(item.id);
                                 // This is a hack to force a re-render of the sidebar, needs rework
-                                window.location.href = `/editor/${selectedCourse}`;
                               }}
                               variant='destructive'
                             >

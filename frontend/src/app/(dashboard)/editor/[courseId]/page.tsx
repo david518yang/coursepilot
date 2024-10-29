@@ -1,6 +1,5 @@
 'use client';
 
-import Editor from '@/components/editor/Editor';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { FileText } from 'lucide-react';

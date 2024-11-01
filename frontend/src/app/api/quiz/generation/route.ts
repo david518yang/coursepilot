@@ -1,68 +1,134 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { shuffle } from 'lodash';
 
 const GEN_AI = new GoogleGenerativeAI(process.env.GEMINI_KEY as string);
 const MODEL = GEN_AI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 export async function POST(req: NextRequest) {
   const { subject, topic, numQuestions, formats } = await req.json();
-  const formatBool: Record<string, boolean> = {};
-  const formatInfo = formats.map((format: string, index: number) => {
-    formatBool[format] = true;
-    return {
-      format: format,
-      isLast: index === formats.length - 1,
-      position: index + 1,
-      formattedString: index === formats.length - 1 ? format : `${format}, `,
-    };
-  });
 
-  const question_formats = formatInfo.map((info: { formattedString: string }) => info.formattedString).join('');
-  const formatSpecificPrompts = {
-    'multiple choice': formatBool['multiple choice']
-      ? 'For multiple choice questions, provide 4 options. Example: {"question": "What is the capital of France?", "answers": ["Paris", "London", "Berlin", "Madrid"], "correct_answer": "Paris", "format": "multiple choice"}'
-      : '',
-    'true false': formatBool['true false']
-      ? 'For true/false questions, ensure a mix of true and false statements. Example: {"question": "The Earth is flat.", "correct_answer": "False", "format": "true false"}'
-      : '',
-    'short answer': formatBool['short answer']
-      ? 'For short answer questions, keep answers concise, ideally 1-3 words. Example: {"question": "Who wrote Romeo and Juliet?", "answer": ["William Shakespeare"], "correct_answer": "William Shakespeare", "format": "short answer"}'
-      : '',
-    'fill in the blank': formatBool['fill in the blank']
-      ? 'For fill-in-the-blank questions, use underscores to indicate the blank space. Example: {"question": "The largest planet in our solar system is _____.", "answers": ["Jupiter"], "correct_answers": ["Jupiter", "jupiter", "JUPITER"], "format": "fill in the blank"}'
-      : '',
-    ['matching']: formatBool['matching']
-      ? 'For matching questions, provide terms or definitions and their corresponding descriptions. Example: {"question": "Match the terms to their descriptions", "answers": {"terms": ["Photosynthesis", "Mitosis", "Osmosis"], "descriptions": ["Process by which plants use sunlight to produce energy", "Cell division resulting in two identical daughter cells", "Movement of water molecules across a semipermeable membrane"]}, "correct_answer": {"Photosynthesis": "Process by which plants use sunlight to produce energy", "Mitosis": "Cell division resulting in two identical daughter cells", "Osmosis": "Movement of water molecules across a semipermeable membrane"}, "format": "matching"}'
-      : '',
-    'select all': formatBool['select all']
-      ? 'For select-all questions, include 4-6 options with 2-5 correct answers. Example: {"question": "Which of the following are primary colors?", "answers": ["Red", "Green", "Blue", "Yellow", "Orange"], "correct_answers": ["Red", "Blue", "Yellow"], "format": "select all"}'
-      : '',
+  const distributeQuestions = (numQuestions: number, formats: string[]): Record<string, number> => {
+    const distribution: Record<string, number> = {
+      'multiple choice': 0,
+      'true false': 0,
+      'short answer': 0,
+      'fill in the blank': 0,
+      matching: 0,
+      'select all': 0,
+    };
+
+    // Calculate base number per format
+    const baseNum = Math.floor(numQuestions / formats.length);
+    let remaining = numQuestions - baseNum * formats.length;
+
+    // Assign base number
+    formats.forEach(format => {
+      distribution[format] = baseNum;
+    });
+
+    while (remaining > 0) {
+      const randomFormat = formats[Math.floor(Math.random() * formats.length)];
+      distribution[randomFormat]++;
+      remaining--;
+    }
+
+    return distribution;
   };
 
-  const additionalInstructions = Object.values(formatSpecificPrompts).filter(Boolean).join(' ');
+  const questionDistribution = distributeQuestions(numQuestions, formats);
+  console.log(questionDistribution);
 
-  const PROMPT = `Generate ${numQuestions} quiz question(s) in the formats ${question_formats} and their answers based for the topic ${topic} within the subject ${subject}. 
-Respond with a JSON array of objects ONLY, no other text, each with "question", "answers", and "correct_answer", and "format" fields. 
-${additionalInstructions}
-Make sure the questions capture the topic within the subject thoroughly, the questions are challenging but clear, and the answers are concise and accurate.`;
+  const formatSpecificPrompts = {
+    'multiple choice': `Generate exactly ${questionDistribution['multiple choice']} multiple choice question(s) about ${topic} in ${subject}. For each question:
+- Make the question clear and specific
+- Provide exactly 4 answer choices labeled A-D
+- Include only one correct answer
+- Make incorrect choices plausible but clearly wrong
+- Avoid "all/none of the above"
+Format as JSON: {"question": "What is X?", "answers": ["answer1", "answer2", "answer3", "answer4"], "correct_answer": "answer1", "format": "multiple choice"}. Return ONLY the JSON array.`,
+
+    'true false': `Generate exactly ${questionDistribution['true false']} true/false question(s) about ${topic} in ${subject}. For each question:
+- Make statements clear and unambiguous 
+- Avoid double negatives
+- Focus on important concepts
+- Mix true and false statements evenly
+Format as JSON: {"question": "Statement", "correct_answer": "True", "format": "true false"}. Return ONLY the JSON array.`,
+
+    'short answer': `Generate exactly ${questionDistribution['short answer']} short answer question(s) about ${topic} in ${subject}. For each question:
+- question(s) should have a single specific answer
+- Answer should be 1-3 words maximum
+- Focus on key terms, names, or concepts
+- Avoid question(s) with multiple possible answers
+Format as JSON: {"question": "What is X?", "correct_answer": "Answer", "format": "short answer"}. Return ONLY the JSON array.`,
+
+    'fill in the blank': `Generate exactly ${questionDistribution['fill in the blank']} fill-in-the-blank question(s) about ${topic} in ${subject}. For each question:
+- Use ONE underscore _ to indicate the blank
+- Keep sentences under 15 words
+- Blank should test a key concept
+- Answer should be 1-2 words maximum
+Format as JSON: {"question": "The _ is important.", "correct_answer": ["Answer"], "format": "fill in the blank"}. Return ONLY the JSON array.`,
+
+    matching: `Generate exactly ${questionDistribution['matching']} matching sets about ${topic} in ${subject}. For each set:
+- Create 4-6 pairs of related terms and descriptions
+- Terms should be concise (1-3 words)
+- Descriptions should be clear and specific
+- All items should be related to the same concept
+Format as JSON: {"question": "Match terms to descriptions", "answers": {"terms": ["Term1", "Term2"], "descriptions": ["Desc1", "Desc2"]}, "correct_answers": {"Term1": "Desc1", "Term2": "Desc2"}, "format": "matching"}. Return ONLY the JSON array.`,
+
+    'select all': `Generate exactly ${questionDistribution['select all']} select-all question(s) about ${topic} in ${subject}. For each question:
+- Provide 4-6 total options
+- Include 2-4 correct answers
+- Make all options related and plausible
+- Avoid obvious incorrect answers
+Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "answer2", "answer3", "answer4"], "correct_answers": ["answer1", "answer3"], "format": "select all"}. Return ONLY the JSON array.`,
+  };
+
+  for (const format in formatSpecificPrompts) {
+    formatSpecificPrompts[format as keyof typeof formatSpecificPrompts] =
+      'You are an expert test creator. ' + formatSpecificPrompts[format as keyof typeof formatSpecificPrompts];
+  }
+
+  const selectedFormatPrompts = formats.map(
+    (format: string) => formatSpecificPrompts[format as keyof typeof formatSpecificPrompts]
+  );
 
   try {
-    const completion = await MODEL.generateContent(PROMPT);
-    const generatedContent = completion.response.text();
-    console.log(generatedContent);
-    const parsedContent = JSON.parse(generatedContent);
+    const responses = await Promise.all(
+      selectedFormatPrompts.map(async (prompt: string) => {
+        console.log(prompt + '\n');
+        const completion = await MODEL.generateContent(prompt);
+        const cleanedResponse = completion.response.text().replace(/```json|```/g, '');
+        const parsedResponse = JSON.parse(cleanedResponse);
+        const questions = Array.isArray(parsedResponse) ? parsedResponse : [parsedResponse];
 
-    const quizData = parsedContent.map((item: any) => ({
-      question: item.question,
-      answers: item.answers,
-      correct_answer: item.correct_answer,
-      format: item.format,
-    }));
+        const format = Object.keys(questionDistribution).find(f =>
+          prompt.includes(f)
+        ) as keyof typeof questionDistribution;
+
+        if (questions.length !== questionDistribution[format]) {
+          console.warn(
+            `Expected ${questionDistribution[format]} question(s) for ${format}, but got ${questions.length}`
+          );
+        }
+
+        return questions;
+      })
+    );
+
+    const quizData = shuffle(responses.flat());
+
+    quizData.forEach((question: any, index: number) => {
+      console.log(`Question ${index + 1}:`);
+      console.log('Question:', question.question);
+      console.log('Correct Answers:', question.correct_answer || question.correct_answers);
+      console.log('---');
+    });
 
     if (quizData.length !== numQuestions) {
       throw new Error(`Expected ${numQuestions} questions, but received ${quizData.length}`);
     }
-    console.log(quizData);
+
     return NextResponse.json(quizData);
   } catch (error) {
     console.error('Error generating quiz:', error);

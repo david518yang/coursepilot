@@ -8,109 +8,121 @@ import FillBlank from './question_formats/FillBlank';
 import Matching from './question_formats/Matching';
 
 interface QuizQuestionsProps {
-  questions: QuizQuestion[];
+  questions: QuizQuestion<any, any>[];
 }
 
-const QuizQuestions: React.FC<QuizQuestionsProps> = ({ questions }) => {
-  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[] | Record<string, string>>>({});
+type AnswerType = string | string[] | { terms: string[]; descriptions: string[] };
+type CorrectAnswerType = string | string[] | { [term: string]: string };
 
-  const handleAnswerChange = (questionIndex: number, answer: string) => {
+const QuizQuestions = <AnswerType, CorrectAnswerType>({
+  questions,
+}: {
+  questions: QuizQuestion<AnswerType, CorrectAnswerType>[];
+}) => {
+  const [userAnswers, setUserAnswers] = useState<Record<number, AnswerType>>({});
+
+  const handleMultipleChoiceChange = (questionIndex: number, answer: string) => {
     setUserAnswers(prev => ({
       ...prev,
-      [questionIndex]: answer,
+      [questionIndex]: answer as AnswerType,
     }));
   };
 
-  const handleMultiAnswerChange = (questionIndex: number, answer: string, isChecked: boolean) => {
+  const handleSelectAllChange = (questionIndex: number, answer: string, isChecked: boolean) => {
     setUserAnswers(prev => {
-      const currentAnswers = (prev[questionIndex] as string[]) || [];
-      if (isChecked) {
-        return { ...prev, [questionIndex]: [...currentAnswers, answer] };
-      } else {
-        return { ...prev, [questionIndex]: currentAnswers.filter(a => a !== answer) };
-      }
+      const currentAnswers = Array.isArray(prev[questionIndex]) ? (prev[questionIndex] as string[]) : [];
+      const newAnswers = isChecked ? [...currentAnswers, answer] : currentAnswers.filter(a => a !== answer);
+      return {
+        ...prev,
+        [questionIndex]: newAnswers as AnswerType,
+      };
     });
   };
 
-  const handleFillInBlankChange = (questionIndex: number, answer: string) => {
+  const handleStringChange = (questionIndex: number, answer: string) => {
     setUserAnswers(prev => ({
       ...prev,
-      [questionIndex]: answer,
+      [questionIndex]: answer as AnswerType,
     }));
   };
 
-  const handleMatchingChange = (questionIndex: number, question: string, answer: string) => {
+  const handleMatchingChange = (questionIndex: number, answer: Record<string, string>) => {
     setUserAnswers(prev => {
       const currentAnswers = (prev[questionIndex] as Record<string, string>) || {};
-      return { ...prev, [questionIndex]: { ...currentAnswers, [question]: answer } };
+      const newAnswer = { ...currentAnswers, ...answer } as AnswerType;
+      return { ...prev, [questionIndex]: newAnswer };
     });
   };
 
   return (
     <div>
       <ul className='list-decimal pl-6'>
-        {questions.map((item: QuizQuestion, index: number) => (
-          <li key={index} className='mb-4'>
-            <p className='font-semibold'>{item.question}</p>
-            <div className='mt-1'>
-              {item.format === 'multiple choice' && (
-                <MultipleChoice
-                  question={item.question}
-                  answers={item.answers}
-                  selectedAnswer={userAnswers[index] as string | null}
-                  onAnswerChange={answer => handleAnswerChange(index, answer)}
-                  index={index}
-                />
-              )}
-              {item.format === 'select all' && (
-                <SelectAll
-                  question={item.question}
-                  answers={item.answers}
-                  selectedAnswers={userAnswers[index] as string[]}
-                  onMultiAnswerChange={(answer: string, isChecked: boolean) =>
-                    handleMultiAnswerChange(index, answer, isChecked)
-                  }
-                  index={index}
-                />
-              )}
-              {item.format === 'true false' && (
-                <TrueFalse
-                  question={item.question}
-                  selectedAnswer={userAnswers[index] as string | null}
-                  onTFChange={(answer: string) => handleAnswerChange(index, answer)}
-                  index={index}
-                />
-              )}
-              {item.format === 'short answer' && (
-                <ShortAnswer
-                  question={item.question}
-                  selectedAnswer={userAnswers[index] as string | null}
-                  onAnswerChange={(answer: string) => handleAnswerChange(index, answer)}
-                  index={index}
-                />
-              )}
-              {item.format === 'fill in the blank' && (
-                <FillBlank
-                  question={item.question}
-                  selectedAnswer={userAnswers[index] as string | null}
-                  onAnswerChange={(answer: string) => handleFillInBlankChange(index, answer)}
-                  index={index}
-                />
-              )}
-              {item.format === 'matching' && (
-                <Matching
-                  question={item.question}
-                  answers={item.answers}
-                  selectedAnswer={userAnswers[index] as Record<string, string> | null}
-                  onMatchingChange={(question: string, answer: string) => handleMatchingChange(index, question, answer)}
-                  index={index}
-                />
-              )}
-            </div>
-          </li>
-        ))}
+        {questions.map((item: QuizQuestion<AnswerType, CorrectAnswerType>, index: number) => {
+          return (
+            <li key={index} className='mb-4'>
+              {item.format !== 'fill in the blank' && <p className='font-semibold'>{item.question}</p>}
+              <div className='mt-1'>
+                {item.format === 'multiple choice' && (
+                  <MultipleChoice
+                    answers={item.answers as string[]}
+                    selectedAnswer={userAnswers[index] as string | null}
+                    onAnswerChange={answer => handleMultipleChoiceChange(index, answer)}
+                    index={index}
+                  />
+                )}
+                {item.format === 'select all' && (
+                  <SelectAll
+                    answers={item.answers as string[]}
+                    selectedAnswers={(userAnswers[index] as string[]) || []}
+                    onMultiAnswerChange={(answer: string, isChecked: boolean) =>
+                      handleSelectAllChange(index, answer, isChecked)
+                    }
+                    index={index}
+                  />
+                )}
+                {item.format === 'true false' && (
+                  <TrueFalse
+                    selectedAnswer={userAnswers[index] as string | null}
+                    onTFChange={(answer: string) => handleStringChange(index, answer)}
+                    index={index}
+                  />
+                )}
+                {item.format === 'short answer' && (
+                  <ShortAnswer
+                    selectedAnswer={userAnswers[index] as string | null}
+                    onAnswerChange={(answer: string) => handleStringChange(index, answer)}
+                    index={index}
+                  />
+                )}
+                {item.format === 'fill in the blank' && (
+                  <FillBlank
+                    question={item.question}
+                    selectedAnswer={userAnswers[index] as string | null}
+                    onAnswerChange={(answer: string) => handleStringChange(index, answer)}
+                    index={index}
+                  />
+                )}
+                {item.format === 'matching' && (
+                  <Matching
+                    answers={item.answers as { terms: string[]; descriptions: string[] }}
+                    selectedAnswers={userAnswers[index] as Record<string, string> | null}
+                    onMatchingChange={(answers: Record<string, string>) => handleMatchingChange(index, answers)}
+                    index={index}
+                  />
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
-      <button type='submit' className='bg-blue-500 text-white px-4 py-2 rounded mt-4'>
+      <button
+        type='submit'
+        className='bg-blue-500 text-white px-4 py-2 rounded mt-4'
+        onClick={e => {
+          e.preventDefault();
+          console.log('User Answers:', userAnswers);
+        }}
+      >
         Submit Quiz
       </button>
     </div>

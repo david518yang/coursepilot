@@ -1,7 +1,6 @@
 import React from 'react';
 
 interface MultipleChoiceProps {
-  question: string;
   answers: string[];
   selectedAnswer: string | null;
   onAnswerChange: (answer: string) => void;
@@ -9,7 +8,6 @@ interface MultipleChoiceProps {
 }
 
 const MultipleChoice: React.FC<MultipleChoiceProps> = ({
-  question,
   answers,
   selectedAnswer,
   onAnswerChange,

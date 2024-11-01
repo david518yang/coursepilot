@@ -1,13 +1,12 @@
 import React from 'react';
 
 interface TrueFalseProps {
-  question: string;
   selectedAnswer: string | null;
   onTFChange: (answer: string) => void;
   index: number;
 }
 
-const TrueFalse: React.FC<TrueFalseProps> = ({ question, selectedAnswer, onTFChange, index }) => {
+const TrueFalse: React.FC<TrueFalseProps> = ({ selectedAnswer, onTFChange, index }) => {
   return (
     <div>
       {['True', 'False'].map((answer, answerIndex) => (

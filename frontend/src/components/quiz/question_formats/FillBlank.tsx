@@ -10,15 +10,21 @@ interface FillBlankProps {
 const FillBlank: React.FC<FillBlankProps> = ({ question, selectedAnswer, onAnswerChange, index }) => {
   return (
     <div>
-      <input
-        type='text'
-        id={`q${index}-answer`}
-        name={`question-${index}`}
-        value={selectedAnswer || ''}
-        onChange={e => onAnswerChange(e.target.value)}
-        className='w-full p-2 border rounded'
-        placeholder='Fill in the blank'
-      />
+      <p className='font-semibold'>
+        {question.split('_').map((part, i, arr) => (
+          <React.Fragment key={i}>
+            {part}
+            {i < arr.length - 1 && (
+              <input
+                type='text'
+                value={selectedAnswer || ''}
+                onChange={e => onAnswerChange(e.target.value)}
+                className='w-32 px-1 mx-1 border rounded'
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </p>
     </div>
   );
 };

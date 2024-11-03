@@ -18,17 +18,19 @@ export async function POST(req: NextRequest) {
       'select all': 0,
     };
 
-    // Calculate base number per format
     const baseNum = Math.floor(numQuestions / formats.length);
     let remaining = numQuestions - baseNum * formats.length;
 
-    // Assign base number
     formats.forEach(format => {
       distribution[format] = baseNum;
     });
-
     while (remaining > 0) {
-      const randomFormat = formats[Math.floor(Math.random() * formats.length)];
+      // Find formats with minimum count
+      const minCount = Math.min(...formats.map(f => distribution[f]));
+      const formatsWithMinCount = formats.filter(f => distribution[f] === minCount);
+
+      // Randomly select from formats with minimum count
+      const randomFormat = formatsWithMinCount[Math.floor(Math.random() * formatsWithMinCount.length)];
       distribution[randomFormat]++;
       remaining--;
     }
@@ -89,9 +91,9 @@ Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "an
       'You are an expert test creator. ' + formatSpecificPrompts[format as keyof typeof formatSpecificPrompts];
   }
 
-  const selectedFormatPrompts = formats.map(
-    (format: string) => formatSpecificPrompts[format as keyof typeof formatSpecificPrompts]
-  );
+  const selectedFormatPrompts = formats
+    .filter(format => questionDistribution[format] > 0)
+    .map((format: string) => formatSpecificPrompts[format as keyof typeof formatSpecificPrompts]);
 
   try {
     const responses = await Promise.all(
@@ -121,6 +123,8 @@ Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "an
     quizData.forEach((question: any, index: number) => {
       console.log(`Question ${index + 1}:`);
       console.log('Question:', question.question);
+      console.log('Format:', question.format);
+      console.log('Answers:', question.answers);
       console.log('Correct Answers:', question.correct_answer || question.correct_answers);
       console.log('---');
     });

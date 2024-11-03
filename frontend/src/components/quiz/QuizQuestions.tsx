@@ -1,4 +1,7 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { QuizQuestion } from './GenerateQuiz';
 import MultipleChoice from './question_formats/MultipleChoice';
 import SelectAll from './question_formats/SelectAll';
@@ -7,19 +10,22 @@ import ShortAnswer from './question_formats/ShortAnswer';
 import FillBlank from './question_formats/FillBlank';
 import Matching from './question_formats/Matching';
 
-interface QuizQuestionsProps {
-  questions: QuizQuestion<any, any>[];
-}
-
 type AnswerType = string | string[] | { terms: string[]; descriptions: string[] };
 type CorrectAnswerType = string | string[] | { [term: string]: string };
 
-const QuizQuestions = <AnswerType, CorrectAnswerType>({
-  questions,
-}: {
-  questions: QuizQuestion<AnswerType, CorrectAnswerType>[];
-}) => {
-  const [userAnswers, setUserAnswers] = useState<Record<number, AnswerType>>({});
+const QuizQuestions = () => {
+  const [questions, setQuestions] = useState<QuizQuestion<any, any>[]>([]);
+  const [userAnswers, setUserAnswers] = useState<Record<number, any>>({});
+  const router = useRouter();
+
+  useEffect(() => {
+    const storedQuizData = localStorage.getItem('quizData');
+    if (!storedQuizData) {
+      router.push('/quiz/generate');
+      return;
+    }
+    setQuestions(JSON.parse(storedQuizData));
+  }, []);
 
   const handleMultipleChoiceChange = (questionIndex: number, answer: string) => {
     setUserAnswers(prev => ({
@@ -49,19 +55,23 @@ const QuizQuestions = <AnswerType, CorrectAnswerType>({
   const handleMatchingChange = (questionIndex: number, answer: Record<string, string>) => {
     setUserAnswers(prev => {
       const currentAnswers = (prev[questionIndex] as Record<string, string>) || {};
-      const newAnswer = { ...currentAnswers, ...answer } as AnswerType;
+      const newAnswer = { ...currentAnswers, ...answer } as unknown as AnswerType;
       return { ...prev, [questionIndex]: newAnswer };
     });
   };
 
   return (
-    <div>
-      <ul className='list-decimal pl-6'>
-        {questions.map((item: QuizQuestion<AnswerType, CorrectAnswerType>, index: number) => {
+    <div className='max-w-4xl mx-auto py-8 px-4'>
+      <ul className='space-y-12'>
+        {questions.map((item, index) => {
           return (
-            <li key={index} className='mb-4'>
-              {item.format !== 'fill in the blank' && <p className='font-semibold'>{item.question}</p>}
-              <div className='mt-1'>
+            <li key={index} className='bg-white rounded-lg shadow-lg border border-gray-200 p-6'>
+              {item.format !== 'fill in the blank' && (
+                <p className='text-lg font-semibold mb-4 text-gray-800'>
+                  {index + 1}. {item.question}
+                </p>
+              )}
+              <div>
                 {item.format === 'multiple choice' && (
                   <MultipleChoice
                     answers={item.answers as string[]}
@@ -115,16 +125,18 @@ const QuizQuestions = <AnswerType, CorrectAnswerType>({
           );
         })}
       </ul>
-      <button
-        type='submit'
-        className='bg-blue-500 text-white px-4 py-2 rounded mt-4'
-        onClick={e => {
-          e.preventDefault();
-          console.log('User Answers:', userAnswers);
-        }}
-      >
-        Submit Quiz
-      </button>
+      <div className='flex justify-center mt-12'>
+        <button
+          type='submit'
+          className='bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium shadow-md transition-colors'
+          onClick={e => {
+            e.preventDefault();
+            console.log('User Answers:', userAnswers);
+          }}
+        >
+          Submit Quiz
+        </button>
+      </div>
     </div>
   );
 };

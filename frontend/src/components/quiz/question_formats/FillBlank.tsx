@@ -11,6 +11,7 @@ const FillBlank: React.FC<FillBlankProps> = ({ question, selectedAnswer, onAnswe
   return (
     <div>
       <p className='font-semibold'>
+        {index + 1}.{' '}
         {question.split('_').map((part, i, arr) => (
           <React.Fragment key={i}>
             {part}

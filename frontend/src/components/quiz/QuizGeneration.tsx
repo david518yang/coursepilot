@@ -1,16 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import useGenerateQuiz, { QuizQuestion } from './GenerateQuiz';
 import QuizQuestions from './QuizQuestions';
 import FormatSelector from './FormatSelector';
-const Quiz: React.FC = () => {
+
+const QuizGeneration: React.FC = () => {
   const [topic, setTopic] = useState('');
   const [subject, setSubject] = useState('');
   const [numQuestions, setNumQuestions] = useState(1);
   const [formats, setFormats] = useState<string[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
   const { quizData, isGenerating, error, generateQuiz } = useGenerateQuiz();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (quizData.length > 0) {
+      handleNavigation(quizData);
+    }
+  }, [quizData]);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +37,11 @@ const Quiz: React.FC = () => {
       return;
     }
     await generateQuiz(subject, topic, numQuestions, formats);
+  };
+
+  const handleNavigation = (quizData: QuizQuestion<any, any>[]) => {
+    localStorage.setItem('quizData', JSON.stringify(quizData));
+    router.push('/quiz/questions');
   };
 
   return (
@@ -79,15 +93,8 @@ const Quiz: React.FC = () => {
       </form>
 
       {error && <p className='text-red-500'>{error}</p>}
-
-      {quizData.length > 0 && (
-        <div className='mt-8'>
-          <h2 className='text-2xl font-bold mb-4'>Quiz Questions</h2>
-          <QuizQuestions questions={quizData} />
-        </div>
-      )}
     </div>
   );
 };
 
-export default Quiz;
+export default QuizGeneration;

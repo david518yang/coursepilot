@@ -72,9 +72,9 @@ Format as JSON: {"question": "What is X?", "format": "short answer"}. Return ONL
 Format as JSON: {"question": "The _ is important.", "format": "fill in the blank"}. Return ONLY the JSON array.`,
 
     matching: `Generate exactly ${questionDistribution['matching']} matching sets about ${topic} in ${subject}. For each set:
-- Create 4-6 pairs of related terms and descriptions
-- Terms should be concise (1-3 words)
-- Descriptions should be clear and specific
+- Create 3-5 pairs of related terms and descriptions
+- Terms should be concise (1-3 words), and be specific to the topic
+- Descriptions should be clear and specific to which term they should be matched to
 - All items should be related to the same concept
 Format as JSON: {"question": "Match terms to descriptions", "answers": {"terms": ["Term1", "Term2"], "descriptions": ["Desc1", "Desc2"]}, "correct_answers": {"Term1": "Desc1", "Term2": "Desc2"}, "format": "matching"}. Return ONLY the JSON array.`,
 

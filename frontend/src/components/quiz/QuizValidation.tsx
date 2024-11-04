@@ -116,30 +116,38 @@ const QuizValidation = () => {
               {!result.isCorrect && (
                 <div className='mt-4 bg-red-100 p-3 rounded'>
                   {result.format === 'matching' && (
-                    <>
-                      <div className='mt-2'>
-                        <p className='text-sm text-gray-600'>Your matches:</p>
-                        <div className='font-medium'>
+                    <div className='grid grid-cols-2 gap-6'>
+                      <div className='bg-white p-4 rounded-lg shadow-sm border border-gray-200'>
+                        <h4 className='text-sm font-semibold text-gray-600 mb-3'>Your Matches</h4>
+                        <div className='space-y-2'>
                           {Object.entries(result.userAnswer || {}).map(([term, desc]) => (
-                            <div key={term} className='flex gap-2'>
-                              <span>{term}:</span>
-                              <span>{String(desc)}</span>
+                            <div key={term} className='grid grid-cols-[120px_auto_1fr] gap-2 p-2 bg-gray-50 rounded'>
+                              <div className='font-medium text-gray-700 text-right'>{term}</div>
+                              <div className='text-gray-500 justify-self-center'>→</div>
+                              <div className='text-gray-900'>{String(desc)}</div>
                             </div>
                           ))}
                         </div>
                       </div>
-                      <div className='mt-2'>
-                        <p className='text-sm text-gray-600'>Correct matches:</p>
-                        <div className='font-medium'>
+
+                      <div className='bg-white p-4 rounded-lg shadow-sm border border-gray-200'>
+                        <h4 className='text-sm font-semibold text-gray-600 mb-3 flex items-center'>
+                          <svg className='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
+                          </svg>
+                          Correct Matches
+                        </h4>
+                        <div className='space-y-2'>
                           {Object.entries(result.correctAnswer).map(([term, desc]) => (
-                            <div key={term} className='flex gap-2'>
-                              <span>{term}:</span>
-                              <span>{String(desc)}</span>
+                            <div key={term} className='grid grid-cols-[120px_auto_1fr] gap-2 p-2 bg-gray-50 rounded'>
+                              <div className='font-medium text-gray-700 text-right'>{term}</div>
+                              <div className='text-gray-500 justify-self-center'>→</div>
+                              <div className='text-gray-900'>{String(desc)}</div>
                             </div>
                           ))}
                         </div>
                       </div>
-                    </>
+                    </div>
                   )}
 
                   {result.format === 'select all' && (
@@ -184,11 +192,23 @@ const QuizValidation = () => {
               {result.isCorrect && (
                 <div className='mt-2'>
                   <p className='text-sm text-gray-600'>Your correct answer:</p>
-                  <p className='font-medium'>
-                    {typeof result.userAnswer === 'object'
-                      ? JSON.stringify(result.userAnswer, null, 2)
-                      : result.userAnswer}
-                  </p>
+                  {result.format === 'matching' ? (
+                    <div className='space-y-2'>
+                      {Object.entries(result.userAnswer).map(([term, desc]) => (
+                        <div key={term} className='grid grid-cols-[120px_auto_1fr] gap-2 p-2 bg-gray-50 rounded'>
+                          <div className='font-medium text-gray-700 text-right'>{term}</div>
+                          <div className='text-gray-500 justify-self-center'>→</div>
+                          <div className='text-gray-900'>{String(desc)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className='font-medium'>
+                      {typeof result.userAnswer === 'object'
+                        ? JSON.stringify(result.userAnswer, null, 2)
+                        : result.userAnswer}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

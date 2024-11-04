@@ -131,7 +131,8 @@ const QuizQuestions = () => {
           className='bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium shadow-md transition-colors'
           onClick={e => {
             e.preventDefault();
-            console.log('User Answers:', userAnswers);
+            localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
+            router.push('/quiz/results');
           }}
         >
           Submit Quiz

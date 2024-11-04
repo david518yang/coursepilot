@@ -62,14 +62,14 @@ Format as JSON: {"question": "Statement", "correct_answer": "True", "format": "t
 - Answer should be 1-3 words maximum
 - Focus on key terms, names, or concepts
 - Avoid question(s) with multiple possible answers
-Format as JSON: {"question": "What is X?", "correct_answer": "Answer", "format": "short answer"}. Return ONLY the JSON array.`,
+Format as JSON: {"question": "What is X?", "format": "short answer"}. Return ONLY the JSON array.`,
 
     'fill in the blank': `Generate exactly ${questionDistribution['fill in the blank']} fill-in-the-blank question(s) about ${topic} in ${subject}. For each question:
 - Use ONE underscore _ to indicate the blank
 - Keep sentences under 15 words
 - Blank should test a key concept
 - Answer should be 1-2 words maximum
-Format as JSON: {"question": "The _ is important.", "correct_answer": ["Answer"], "format": "fill in the blank"}. Return ONLY the JSON array.`,
+Format as JSON: {"question": "The _ is important.", "format": "fill in the blank"}. Return ONLY the JSON array.`,
 
     matching: `Generate exactly ${questionDistribution['matching']} matching sets about ${topic} in ${subject}. For each set:
 - Create 4-6 pairs of related terms and descriptions
@@ -92,7 +92,7 @@ Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "an
   }
 
   const selectedFormatPrompts = formats
-    .filter(format => questionDistribution[format] > 0)
+    .filter((format: string) => questionDistribution[format] > 0)
     .map((format: string) => formatSpecificPrompts[format as keyof typeof formatSpecificPrompts]);
 
   try {
@@ -121,12 +121,7 @@ Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "an
     const quizData = shuffle(responses.flat());
 
     quizData.forEach((question: any, index: number) => {
-      console.log(`Question ${index + 1}:`);
-      console.log('Question:', question.question);
-      console.log('Format:', question.format);
-      console.log('Answers:', question.answers);
-      console.log('Correct Answers:', question.correct_answer || question.correct_answers);
-      console.log('---');
+      console.log(question);
     });
 
     if (quizData.length !== numQuestions) {

@@ -22,11 +22,15 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import CourseDialog from '@/components/CourseDialog';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
-import { ICourseWithNotes } from '@/lib/models/Course';
 
-export function CourseSwitcher({ courses }: { courses: ICourseWithNotes[] }) {
+export function CourseSwitcher() {
   const { isMobile } = useSidebar();
-  const { selectedCourse } = useCoursesContext();
+  const { courses, selectedCourse } = useCoursesContext();
+
+  const { data: notes } = useSWR<INoteDocument[]>(
+    selectedCourse ? `/api/courses/${selectedCourse}/notes` : null,
+    fetcher
+  );
 
   if (courses.length === 0) {
     return (
@@ -57,11 +61,6 @@ export function CourseSwitcher({ courses }: { courses: ICourseWithNotes[] }) {
     if (noteCount === 1) return '1 note';
     return `${noteCount} notes`;
   };
-
-  const { data: notes, mutate } = useSWR<INoteDocument[]>(
-    selectedCourse ? `/api/courses/${selectedCourse}/notes` : null,
-    fetcher
-  );
 
   const activeCourse = {
     name: selectedCourseObject?.title || 'No course',

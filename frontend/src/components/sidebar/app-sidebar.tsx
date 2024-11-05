@@ -15,7 +15,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
-        <CourseSwitcher courses={courses} />
+        <CourseSwitcher />
       </SidebarHeader>
       <SidebarContent>
         {selectedCourse && courses.length > 0 && (

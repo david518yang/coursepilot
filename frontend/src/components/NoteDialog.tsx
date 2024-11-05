@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 // import { TrashIcon } from '@heroicons/react/20/solid';
 import { INoteDocument } from '@/lib/models/Note';
 import useSWR from 'swr';
+import { useRouter } from 'next/navigation';
 import { fetcher } from '@/lib/utils';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 
@@ -26,6 +27,7 @@ interface NoteDialogProps {
 
 const NoteDialog = ({ trigger, editing }: NoteDialogProps) => {
   const { selectedCourse } = useCoursesContext();
+  const router = useRouter();
 
   const [noteName, setNoteName] = useState<string>('');
   const [dialogIsOpen, setDialogIsOpen] = useState<boolean>(false);
@@ -52,6 +54,8 @@ const NoteDialog = ({ trigger, editing }: NoteDialogProps) => {
     const newNote = await res.json();
 
     mutate([...notes, newNote], false);
+
+    router.push(`/editor/${selectedCourse}/${newNote._id}`);
   };
 
   const handleSave = async () => {

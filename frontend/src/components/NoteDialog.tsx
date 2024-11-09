@@ -23,9 +23,10 @@ import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 interface NoteDialogProps {
   trigger: ReactNode;
   editing: boolean;
+  onClose?: () => void;
 }
 
-const NoteDialog = ({ trigger, editing }: NoteDialogProps) => {
+const NoteDialog = ({ trigger, editing, onClose }: NoteDialogProps) => {
   const { selectedCourse } = useCoursesContext();
   const router = useRouter();
 
@@ -61,10 +62,20 @@ const NoteDialog = ({ trigger, editing }: NoteDialogProps) => {
   const handleSave = async () => {
     await addNote();
     setDialogIsOpen(false);
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    setDialogIsOpen(isOpen);
+    if (!isOpen && onClose) {
+      onClose();
+    }
   };
 
   return (
-    <Dialog open={dialogIsOpen} onOpenChange={setDialogIsOpen}>
+    <Dialog open={dialogIsOpen} onOpenChange={handleDialogOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent onClick={e => e.stopPropagation()}>
         <DialogHeader>

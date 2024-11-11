@@ -1,13 +1,11 @@
 'use client';
 
 import { Ellipsis, Trash2, type LucideIcon } from 'lucide-react';
-import { PlusIcon } from '@heroicons/react/20/solid';
 import { INoteDocument } from '@/lib/models/Note';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 import useSWR from 'swr';
 import { FileText } from 'lucide-react';
 import { fetcher } from '@/lib/utils';
-import NoteDialog from '../NoteDialog';
 import moment from 'moment';
 import Link from 'next/link';
 import {
@@ -25,7 +23,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarGroupAction,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +35,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
+import CreateButton from './create-button';
 
 export interface SideBarMenuItem {
   title: string;
@@ -100,15 +98,8 @@ export function NoteList() {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Notes</SidebarGroupLabel>
-      <NoteDialog
-        trigger={
-          <SidebarGroupAction title='Add Note'>
-            <PlusIcon /> <span className='sr-only'>Add Note</span>
-          </SidebarGroupAction>
-        }
-        editing={false}
-      />
+      <SidebarGroupLabel>Course Material</SidebarGroupLabel>
+      <CreateButton />
 
       <SidebarMenu>
         {notes.map(item => (

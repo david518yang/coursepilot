@@ -66,7 +66,7 @@ export function NoteList() {
   const notes =
     data?.map(note => ({
       title: note.title,
-      url: `/editor/${selectedCourse}/${note._id}`,
+      url: `/courses/${selectedCourse}/notes/${note._id}`,
       icon: FileText,
       id: note._id,
       isActive: note._id === selectedNoteId,
@@ -89,7 +89,7 @@ export function NoteList() {
 
       const newNotes = data?.filter(note => note._id !== noteId);
 
-      router.push(`/editor/${selectedCourse}${newNotes && newNotes[0] ? `/${newNotes[0]._id}` : ''}`);
+      router.push(`/courses/${selectedCourse}${newNotes && newNotes[0] ? `/notes/${newNotes[0]._id}` : ''}`);
     } catch (error) {
       console.error(error);
       alert('Failed to delete note');

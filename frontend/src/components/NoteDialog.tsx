@@ -56,7 +56,7 @@ const NoteDialog = ({ trigger, editing, onClose }: NoteDialogProps) => {
 
     mutate([...notes, newNote], false);
 
-    router.push(`/editor/${selectedCourse}/${newNote._id}`);
+    router.push(`/courses/${selectedCourse}/notes/${newNote._id}`);
   };
 
   const handleSave = async () => {

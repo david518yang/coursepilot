@@ -101,7 +101,7 @@ export function CourseSwitcher() {
               <DropdownMenuLabel className='text-xs text-muted-foreground'>Courses</DropdownMenuLabel>
               {courses.map(course => (
                 <DropdownMenuItem key={course.title} asChild>
-                  <Link href={`/editor/${course._id}`} className='gap-2 p-2'>
+                  <Link href={`/courses/${course._id}`} className='gap-2 p-2'>
                     <div className='flex size-6 items-center justify-center rounded-sm border'>{course.emoji}</div>
                     {course.title}
                     {/* Not sure how this works so commented out for now

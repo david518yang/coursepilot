@@ -59,7 +59,7 @@ export default function Sidebar() {
                   <div className='pl-4'>
                     {course.notes.map(note => (
                       <Link
-                        href={`/editor/${course._id}/notes/${note._id}`}
+                        href={`/courses/${course._id}/notes/${note._id}`}
                         key={note._id}
                         className={clsx(
                           'flex items-center px-4 py-2 text-sm hover:bg-muted',

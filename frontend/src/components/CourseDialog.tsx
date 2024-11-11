@@ -97,7 +97,7 @@ const CreateCourseDialog = ({ trigger, editing }: CreateCourseDialogProps) => {
                         if (selectedCourseObject) {
                           deleteCourse(selectedCourseObject._id);
                           setDialogIsOpen(false);
-                          window.location.href = '/editor';
+                          window.location.href = '/courses';
                         }
                       }}
                       variant='destructive'

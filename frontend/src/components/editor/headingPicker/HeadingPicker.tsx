@@ -53,11 +53,11 @@ const headings: Heading[] = [
   },
 ];
 
-const HeadingPicker = ({ editor }: { editor: Editor }) => {
+const HeadingPicker = ({ editor }: { editor: Editor | null }) => {
   const [selectedHeadingIcon, setSelectedHeadingIcon] = useState(headings[0].icon);
 
   const handleHeadingClick = (level: Level, icon: JSX.Element) => {
-    editor.chain().focus().toggleHeading({ level }).run();
+    editor?.chain().focus().toggleHeading({ level }).run();
     setSelectedHeadingIcon(icon);
   };
 
@@ -78,7 +78,7 @@ const HeadingPicker = ({ editor }: { editor: Editor }) => {
           <DropdownMenuItem key={level} asChild>
             <EditorButton
               onClick={() => handleHeadingClick(level, icon)}
-              active={editor.isActive('heading', { level })}
+              active={editor?.isActive('heading', { level })}
             >
               {icon}
             </EditorButton>

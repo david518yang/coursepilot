@@ -8,12 +8,10 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 const FlashcardSet = ({ flashcardId }: { flashcardId: string }) => {
   const { selectedCourse } = useCoursesContext();
 
-  const { data: flashcardSet, isLoading } = useSWR<IFlashcardSetDocument>(
+  const { data: flashcardSet } = useSWR<IFlashcardSetDocument>(
     selectedCourse && flashcardId && `/api/courses/${selectedCourse}/flashcards/${flashcardId}`,
     fetcher
   );
-
-  if (isLoading) return null;
 
   return (
     <div className='grid grid-rows-[auto_1fr] h-screen bg-slate-200'>

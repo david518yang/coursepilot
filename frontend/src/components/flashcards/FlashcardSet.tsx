@@ -17,7 +17,7 @@ const FlashcardSet = ({ flashcardId }: { flashcardId: string }) => {
 
   return (
     <div className='relative flex items-center justify-center h-full w-full gap-8'>
-      <SidebarTrigger className='absolute top-4 left-4' />
+      <SidebarTrigger className='absolute top-2 left-2' />
       {flashcardSet && (
         <div className='flex flex-col w-full items-center gap-4'>
           <h1>

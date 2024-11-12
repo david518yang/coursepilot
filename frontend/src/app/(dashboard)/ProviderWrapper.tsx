@@ -4,6 +4,7 @@ import { CoursesProvider } from '@/lib/hooks/useCourseContext';
 import { ICourseWithNotes } from '@/lib/models/Course';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/sidebar/app-sidebar';
+import { useParams } from 'next/navigation';
 
 export function ProviderWrapper({
   children,

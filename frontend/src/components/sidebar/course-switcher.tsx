@@ -22,10 +22,15 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import CourseDialog from '@/components/CourseDialog';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
+import { useParams } from 'next/navigation';
 
 export function CourseSwitcher() {
   const { isMobile } = useSidebar();
-  const { courses, selectedCourse } = useCoursesContext();
+  const { courses } = useCoursesContext();
+
+  const params = useParams<{ courseId: string; noteId: string }>();
+
+  const selectedCourse = params.courseId;
 
   const { data: notes } = useSWR<INoteDocument[]>(
     selectedCourse ? `/api/courses/${selectedCourse}/notes` : null,

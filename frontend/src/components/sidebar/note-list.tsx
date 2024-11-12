@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
 import CreateButton from './create-button';
+import { useParams } from 'next/navigation';
 
 export interface SideBarMenuItem {
   title: string;
@@ -47,7 +48,9 @@ export interface SideBarMenuItem {
 export function NoteList() {
   const router = useRouter();
   const pathname = usePathname();
-  const { selectedCourse } = useCoursesContext();
+  const params = useParams<{ courseId: string; noteId: string }>();
+
+  const selectedCourse = params.courseId;
 
   const { data, mutate } = useSWR<INoteDocument[]>(
     selectedCourse ? `/api/courses/${selectedCourse}/notes` : null,

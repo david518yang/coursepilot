@@ -10,6 +10,7 @@ import { PlusIcon } from '@heroicons/react/20/solid';
 import { SidebarGroupAction } from '../ui/sidebar';
 import { BookOpenCheck, FileText, Library } from 'lucide-react';
 import NoteDialog from '../NoteDialog';
+import FlashcardDialog from '../FlashcardDialog';
 
 const CreateButton = () => {
   const [isDropdownMenuOpen, setIsDropdownMenuOpen] = useState(false);
@@ -39,10 +40,16 @@ const CreateButton = () => {
           />
         </DropdownMenuGroup>
         <DropdownMenuGroup>
-          <DropdownMenuItem className='gap-2' disabled>
-            <Library />
-            <span>Create flashcards</span>
-          </DropdownMenuItem>
+          <FlashcardDialog
+            trigger={
+              <DropdownMenuItem className='gap-2' onSelect={handleDropdownSelect}>
+                <Library />
+                <span>Create flashcards</span>
+              </DropdownMenuItem>
+            }
+            editing={false}
+            onClose={() => setIsDropdownMenuOpen(false)}
+          />
         </DropdownMenuGroup>
         <DropdownMenuGroup>
           <DropdownMenuItem className='gap-2' disabled>

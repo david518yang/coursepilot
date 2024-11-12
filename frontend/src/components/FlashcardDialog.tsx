@@ -49,8 +49,6 @@ const FlashcardDialog = ({ trigger, onClose }: NoteDialogProps) => {
         return data;
       });
 
-    console.log(generatedFlashcardSet);
-
     const res = await fetch(`/api/courses/${selectedCourse}/flashcards`, {
       method: 'POST',
       headers: {

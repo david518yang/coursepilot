@@ -10,7 +10,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } fr
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { courses, selectedCourse } = useCoursesContext();
+  const { courses } = useCoursesContext();
 
   return (
     <Sidebar collapsible='icon' {...props}>
@@ -18,7 +18,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <CourseSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        {selectedCourse && courses.length > 0 && (
+        {courses.length > 0 && (
           <>
             <NoteList />
           </>

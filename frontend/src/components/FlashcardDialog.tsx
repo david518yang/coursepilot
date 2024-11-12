@@ -15,6 +15,9 @@ import { INoteDocument } from '@/lib/models/Note';
 import { useRouter } from 'next/navigation';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 import { NoteTable } from './NoteTable';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/utils';
+import { SidebarItem } from './sidebar/course-content-list';
 
 interface NoteDialogProps {
   trigger: ReactNode;
@@ -28,8 +31,13 @@ const FlashcardDialog = ({ trigger, onClose }: NoteDialogProps) => {
   const [selectedNotes, setSelectedNotes] = useState<INoteDocument[]>([]);
   const [dialogIsOpen, setDialogIsOpen] = useState<boolean>(false);
 
+  const { data, mutate } = useSWR<SidebarItem[]>(
+    selectedCourse ? `/api/courses/${selectedCourse}/documents` : null,
+    fetcher
+  );
+
   const generateFlashcardSet = async () => {
-    if (!selectedNotes) return;
+    if (!selectedNotes || !data) return;
 
     const generatedFlashcardSet = await fetch('/api/ai/flashcards', {
       method: 'POST',
@@ -63,8 +71,7 @@ const FlashcardDialog = ({ trigger, onClose }: NoteDialogProps) => {
 
     const newFlashcardSet = await res.json();
 
-    // TODO: mutate the sidebar to include the new flashcard set
-    // mutate([...notes, newFlashcardSet], false);
+    mutate([...data, newFlashcardSet], false);
 
     router.push(`/courses/${selectedCourse}/flashcards/${newFlashcardSet._id}`);
   };

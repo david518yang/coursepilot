@@ -26,6 +26,10 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Invalid request' }, { status: 400 });
   }
 
+  if (title.length > 15) {
+    return Response.json({ error: 'Course title must be 15 characters or less' }, { status: 400 });
+  }
+
   const note = await addCourseToDb(title, emoji, user.id);
 
   return Response.json({

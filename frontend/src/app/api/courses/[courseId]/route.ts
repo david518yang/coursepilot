@@ -13,6 +13,10 @@ export async function PATCH(request: Request, { params }: { params: { courseId: 
   try {
     const updatedData = await request.json();
 
+    if (updatedData.title && updatedData.title.length > 15) {
+      return Response.json({ error: 'Note title must be 15 characters or less' }, { status: 400 });
+    }
+
     // Find the course by ID and ensure it belongs to the current user
     const course = await Course.findOneAndUpdate(
       { _id: courseId, userId: user.id },

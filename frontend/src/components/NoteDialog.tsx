@@ -13,8 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-// import { TrashIcon } from '@heroicons/react/20/solid';
-import { INoteDocument } from '@/lib/models/Note';
+import { SidebarItem } from './sidebar/course-content-list';
 import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
 import { fetcher } from '@/lib/utils';
@@ -32,13 +31,14 @@ const NoteDialog = ({ trigger, editing, onClose }: NoteDialogProps) => {
 
   const [noteName, setNoteName] = useState<string>('');
   const [dialogIsOpen, setDialogIsOpen] = useState<boolean>(false);
-  const { data: notes, mutate } = useSWR<INoteDocument[]>(
-    selectedCourse ? `/api/courses/${selectedCourse}/notes` : null,
+  const { data, mutate } = useSWR<SidebarItem[]>(
+    selectedCourse ? `/api/courses/${selectedCourse}/documents` : null,
     fetcher
   );
+  const [error, setError] = useState<string | null>(null);
 
-  const addNote = async () => {
-    if (!notes) return;
+  const addNote = async (): Promise<boolean> => {
+    if (!data) return false;
 
     const res = await fetch(`/api/courses/${selectedCourse}/notes`, {
       method: 'POST',
@@ -49,21 +49,28 @@ const NoteDialog = ({ trigger, editing, onClose }: NoteDialogProps) => {
     });
 
     if (!res.ok) {
-      throw new Error('Failed to add note');
+      const errorResponse = await res.json();
+      setError(errorResponse.error);
+      return false;
     }
 
     const newNote = await res.json();
 
-    mutate([...notes, newNote], false);
+    mutate([...data, newNote], false);
 
     router.push(`/courses/${selectedCourse}/notes/${newNote._id}`);
+
+    return true;
   };
 
   const handleSave = async () => {
-    await addNote();
-    setDialogIsOpen(false);
-    if (onClose) {
-      onClose();
+    const isSuccess = await addNote();
+
+    if (isSuccess) {
+      setDialogIsOpen(false);
+      if (onClose) {
+        onClose();
+      }
     }
   };
 
@@ -101,6 +108,7 @@ const NoteDialog = ({ trigger, editing, onClose }: NoteDialogProps) => {
           </div>
         </div>
         <DialogFooter>
+          <p className='text-red-500 text-sm mx-auto pt-2 sm:pt-0 sm:mx-0 my-auto sm:mr-4'>{error}</p>
           <div className='flex items-center gap-2'>
             {/* {editing && selectedCourseObject && (
               <Dialog>

@@ -94,7 +94,7 @@ const Editor = ({ noteId }: { noteId: string }) => {
         </div>
       )}
       <EditorMenu editor={editor} />
-      <EditorContent editor={editor} />
+      {note && <EditorContent editor={editor} />}
     </div>
   );
 };

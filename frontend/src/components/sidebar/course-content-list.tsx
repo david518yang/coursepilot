@@ -127,14 +127,12 @@ export function CourseContentList() {
               return (
                 <SidebarMenuItem key={item.title} className='flex items-center gap-0.5'>
                   <SidebarMenuButton asChild>
-                    <div className={clsx('flex items-center w-full h-min', isActive && 'bg-sidebar-accent')}>
+                    <div className={clsx('flex items-center w-full h-min', isActive && 'bg-gray-200/80 hover:bg-gray-200')}>
                       <Link href={item.url} prefetch={false} className='flex items-center w-full h-min'>
-                        <div className='flex items-center overflow-ellipsis'>
-                          {Icon && <Icon className='flex-shrink-0 mr-2' />}
-                          <div className='flex flex-col'>
-                            <span className='truncate overlow-hidden whitespace-nowrap w-36'>{item.title}</span>
-                            <span className='text-xs text-gray-500'>{moment(item.updatedAt).fromNow()}</span>
-                          </div>
+                        {Icon && <Icon className='flex-shrink-0 w-6 h-6 pr-2 mr-2' />}
+                        <div className='flex flex-col'>
+                          <span className='truncate overlow-hidden whitespace-nowrap w-36'>{item.title}</span>
+                          <span className='text-xs text-gray-500'>{moment(item.updatedAt).fromNow()}</span>
                         </div>
                       </Link>
                       <DropdownMenu>

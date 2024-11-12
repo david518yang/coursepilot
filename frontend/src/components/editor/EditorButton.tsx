@@ -8,7 +8,7 @@ const EditorButton = ({
 }: {
   children: React.ReactNode;
   onClick: () => void;
-  active: boolean;
+  active?: boolean;
 }) => {
   return (
     <Button

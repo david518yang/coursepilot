@@ -77,10 +77,6 @@ const Editor = ({ noteId }: { noteId: string }) => {
     }
   }, [editor, note?.content]);
 
-  if (isLoading || !editor) return null; // Early return if still loading or no editor instance
-
-  if (!editor || !note) return null;
-
   return (
     <div className='relative grid grid-rows-[auto_1fr] h-full w-full'>
       {courses.length === 0 && (

@@ -4,14 +4,14 @@ import HeadingPicker from './headingPicker/HeadingPicker';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
 
-const EditorMenu = ({ editor }: { editor: Editor }) => {
+const EditorMenu = ({ editor }: { editor: Editor | null }) => {
   return (
     <div className='sticky top-0 z-10 flex flex-row justify-between p-2 border-b bg-background'>
       <div className='flex gap-1 items-center'>
         <SidebarTrigger />
         <div className='w-[1px] h-6 bg-gray-300' />
         <HeadingPicker editor={editor} />
-        <EditorButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}>
+        <EditorButton onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>
           <svg
             xmlns='http://www.w3.org/2000/svg'
             fill='none'
@@ -26,7 +26,7 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
             />
           </svg>
         </EditorButton>
-        <EditorButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')}>
+        <EditorButton onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive('italic')}>
           <svg
             xmlns='http://www.w3.org/2000/svg'
             fill='none'
@@ -43,8 +43,8 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
           </svg>
         </EditorButton>
         <EditorButton
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          active={editor.isActive('underline')}
+          onClick={() => editor?.chain().focus().toggleUnderline().run()}
+          active={editor?.isActive('underline')}
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -62,8 +62,8 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
           </svg>
         </EditorButton>
         <EditorButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          active={editor.isActive('bulletList')}
+          onClick={() => editor?.chain().focus().toggleBulletList().run()}
+          active={editor?.isActive('bulletList')}
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -81,8 +81,8 @@ const EditorMenu = ({ editor }: { editor: Editor }) => {
           </svg>
         </EditorButton>
         <EditorButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          active={editor.isActive('orderedList')}
+          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+          active={editor?.isActive('orderedList')}
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'

@@ -47,7 +47,6 @@ const CreateButton = () => {
                 <span>Create flashcards</span>
               </DropdownMenuItem>
             }
-            editing={false}
             onClose={() => setIsDropdownMenuOpen(false)}
           />
         </DropdownMenuGroup>

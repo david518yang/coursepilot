@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronsUpDown, Sparkles, LogOut, BadgeCheck } from 'lucide-react';
+import { ChevronsUpDown, Sparkles, LogOut, UserRoundCog } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
@@ -81,7 +81,7 @@ export function NavUser() {
                     openUserProfile();
                   }}
                 >
-                  <BadgeCheck className='w-5 h-5 mr-2' />
+                  <UserRoundCog className='w-5 h-5 mr-2' />
                   Account
                 </DropdownMenuItem>
               </DropdownMenuGroup>

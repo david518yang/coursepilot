@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'; 
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -76,6 +76,11 @@ const CreateCourseDialog = ({ trigger, editing }: CreateCourseDialogProps) => {
               <EmojiPicker selectedEmoji={selectedEmoji} setSelectedEmoji={setSelectedEmoji} />
             </div>
           </div>
+          {courseName.length > 15 && (
+            <p className='text-red-500 text-sm pt-2 sm:pt-0 sm:mx-0 my-auto ml-auto'>
+              Course name must be 15 characters or less
+            </p>
+          )}
         </div>
         <DialogFooter>
           <div className='flex items-center gap-2'>

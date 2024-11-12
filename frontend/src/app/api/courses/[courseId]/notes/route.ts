@@ -1,5 +1,6 @@
 import { currentUser } from '@clerk/nextjs/server';
 import Note, { INoteDocument } from '@/lib/models/Note';
+import { SidebarItem } from '@/components/sidebar/course-content-list';
 
 export async function GET(request: Request, { params }: { params: { courseId: string } }) {
   const getNotesFromCourse = async (courseId: string, userId: string): Promise<INoteDocument[]> => {
@@ -20,7 +21,7 @@ export async function GET(request: Request, { params }: { params: { courseId: st
 }
 
 export async function POST(request: Request, { params }: { params: { courseId: string } }) {
-  const addNoteToCourse = async (courseId: string, title: string, userId: string): Promise<INoteDocument> => {
+  const addNoteToCourse = async (courseId: string, title: string, userId: string): Promise<SidebarItem> => {
     const newNote = new Note({
       courseId,
       title,
@@ -30,7 +31,13 @@ export async function POST(request: Request, { params }: { params: { courseId: s
 
     const note = await newNote.save();
 
-    return note;
+    return {
+      _id: note._id.toString(),
+      title: note.title,
+      type: 'note',
+      url: `/courses/${courseId}/notes/${note._id}`,
+      updatedAt: note.updatedAt.toISOString(),
+    };
   };
 
   const user = await currentUser();
@@ -43,6 +50,10 @@ export async function POST(request: Request, { params }: { params: { courseId: s
 
   if (!body.title) {
     return Response.json({ error: 'Invalid request' }, { status: 400 });
+  }
+
+  if (body.title.length > 15) {
+    return Response.json({ error: 'Course title must be 15 characters or less' }, { status: 400 });
   }
 
   const note = await addNoteToCourse(params.courseId, body.title, user.id);

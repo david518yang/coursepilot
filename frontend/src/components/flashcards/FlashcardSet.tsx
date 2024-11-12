@@ -16,10 +16,12 @@ const FlashcardSet = ({ flashcardId }: { flashcardId: string }) => {
   if (isLoading) return null;
 
   return (
-    <div className='relative flex items-center justify-center h-full w-full gap-8'>
-      <SidebarTrigger className='absolute top-2 left-2' />
+    <div className='grid grid-rows-[auto_1fr] h-screen bg-slate-200'>
+      <div className='sticky top-0 z-10 flex flex-row justify-between p-2 border-b bg-background'>
+        <SidebarTrigger />
+      </div>
       {flashcardSet && (
-        <div className='flex flex-col w-full items-center gap-4'>
+        <div className='flex flex-col my-auto w-full items-center gap-4'>
           <h1>
             <b>{flashcardSet.title}</b>
           </h1>

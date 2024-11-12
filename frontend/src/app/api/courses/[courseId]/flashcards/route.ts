@@ -1,11 +1,12 @@
 import { currentUser } from '@clerk/nextjs/server';
 import FlashcardSet, { IFlashcardSetDocument } from '@/lib/models/Flashcard';
+import { SidebarItem } from '@/components/sidebar/course-content-list';
 
 export async function GET(request: Request, { params }: { params: { courseId: string } }) {
   const getFlashcardSetsFromCourse = async (courseId: string, userId: string): Promise<IFlashcardSetDocument[]> => {
-    const notes = await FlashcardSet.find({ courseId, userId }).sort({ updatedAt: 'desc' });
+    const flashCardSets = await FlashcardSet.find({ courseId, userId }).sort({ updatedAt: 'desc' });
 
-    return notes;
+    return flashCardSets;
   };
 
   const user = await currentUser();
@@ -14,9 +15,9 @@ export async function GET(request: Request, { params }: { params: { courseId: st
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const notes = await getFlashcardSetsFromCourse(params.courseId, user.id);
+  const flashCardSets = await getFlashcardSetsFromCourse(params.courseId, user.id);
 
-  return Response.json(notes);
+  return Response.json(flashCardSets);
 }
 
 export async function POST(request: Request, { params }: { params: { courseId: string } }) {
@@ -24,7 +25,7 @@ export async function POST(request: Request, { params }: { params: { courseId: s
     courseId: string,
     userId: string,
     generatedFlashcardSet: string
-  ): Promise<IFlashcardSetDocument> => {
+  ): Promise<SidebarItem> => {
     const parsedFlashcardSet = JSON.parse(generatedFlashcardSet);
     const flashcardTitle = parsedFlashcardSet.title;
     const flashcards = parsedFlashcardSet.flashcards;
@@ -37,7 +38,13 @@ export async function POST(request: Request, { params }: { params: { courseId: s
 
     const flashcardSet = await newFlashcardSet.save();
 
-    return flashcardSet;
+    return {
+      _id: flashcardSet._id.toString(),
+      title: flashcardSet.title,
+      type: 'flashcard',
+      url: `/courses/${courseId}/flashcards/${flashcardSet._id}`,
+      updatedAt: flashcardSet.updatedAt.toISOString(),
+    };
   };
 
   const user = await currentUser();

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { NoteList } from '@/components/sidebar/note-list';
+import { CourseContentList } from '@/components/sidebar/course-content-list';
 import { NavUser } from '@/components/sidebar/nav-user';
 import { CourseSwitcher } from '@/components/sidebar/course-switcher';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
@@ -20,7 +20,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {courses.length > 0 && (
           <>
-            <NoteList />
+            <CourseContentList />
           </>
         )}
       </SidebarContent>

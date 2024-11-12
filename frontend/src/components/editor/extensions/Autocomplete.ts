@@ -6,7 +6,7 @@ const AUTOCOMPLETE_PLUGIN_KEY = new PluginKey('autocomplete');
 const AUTOCOMPLETE_DEBOUNCE_TIME = 500;
 
 const getAutocompletedText = async (prefix: string) => {
-  const autocompletedText = await fetch('/api/editor/autocomplete', {
+  const autocompletedText = await fetch('/api/ai/autocomplete', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -20,6 +20,12 @@ const nextConfig = {
         destination: '/courses/:courseId',
         permanent: false,
       },
+      {
+        // Redirect /courses/[courseId]/flashcards with no flashcard ID
+        source: '/courses/:courseId/documents',
+        destination: '/courses/:courseId',
+        permanent: false,
+      },
       // Optional: Handle trailing slashes as well
       {
         source: '/courses/:courseId/notes/',
@@ -33,6 +39,11 @@ const nextConfig = {
       },
       {
         source: '/courses/:courseId/flashcards/',
+        destination: '/courses/:courseId',
+        permanent: false,
+      },
+      {
+        source: '/courses/:courseId/documents/',
         destination: '/courses/:courseId',
         permanent: false,
       }

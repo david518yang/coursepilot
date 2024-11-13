@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
-import { IFlashcardSetDocument } from '@/lib/models/Flashcard';
-import { INoteDocument } from '@/lib/models/Note';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/utils';
 import { SidebarItem } from '@/components/sidebar/course-content-list';

@@ -88,7 +88,7 @@ const DocumentTitle = ({
 
   return (
     <Input
-      className='h-full w-20 sm:w-36'
+      className='h-full bg-background w-20 sm:w-36'
       type='text'
       value={title}
       onChange={handleTitleChange}

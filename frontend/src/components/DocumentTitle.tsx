@@ -41,10 +41,14 @@ const DocumentTitle = ({
   }
 
   const saveTitle = async () => {
+    if (title === previousTitle) {
+      return;
+    }
     if (title.length <= 0) {
       setTitle(previousTitle);
       return;
     }
+
     const res = await fetch(`/api/courses/${selectedCourse}/${documentType}s/${documentId}`, {
       method: 'PATCH',
       headers: {

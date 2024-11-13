@@ -78,7 +78,7 @@ const Editor = ({ noteId }: { noteId: string }) => {
   }, [editor, note?.content]);
 
   return (
-    <div className='relative grid grid-rows-[auto_1fr] h-full w-full'>
+    <div className='relative grid grid-rows-[auto_1fr] h-full w-full overflow-auto'>
       {courses.length === 0 && (
         <div className='absolute inset-0 z-[40] flex flex-col items-center justify-center bg-gray-300 bg-opacity-75'>
           <CourseDialog

@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const emojis = ['📝', '📚', '💡', '🎯', '📅', '🔍', '✅', '🗂️', '📌'];
+const emojis = ['📝', '📚', '🤓', '💻', '🧬', '🧮', '📓', '💵', '📌'];
 
 interface EmojiPickerProps {
   selectedEmoji: string;

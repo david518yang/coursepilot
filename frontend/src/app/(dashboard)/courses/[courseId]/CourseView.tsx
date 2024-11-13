@@ -11,7 +11,7 @@ export default function CourseView({ courseId }: { courseId: string }) {
 
   return (
     <div className='grid grid-rows-[auto_1fr] h-screen'>
-      <div className='sticky top-0 z-10 flex flex-row justify-between p-2 border-b bg-background'>
+      <div className='sticky top-0 z-10 flex flex-row justify-between p-2 border-b bg-sidebar'>
         <SidebarTrigger />
       </div>
       <div className='grid place-items-center h-full w-full text-xl flex-1 bg-gray-200'>

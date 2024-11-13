@@ -96,7 +96,7 @@ const DocumentTitle = ({
 
   return (
     <Input
-      className={clsx('h-full sm:w-36', !flashcardId ? 'w-20' : 'w-36')}
+      className={clsx('h-full bg-background sm:w-36', !flashcardId ? 'w-20' : 'w-36')}
       type='text'
       value={title}
       onChange={handleTitleChange}

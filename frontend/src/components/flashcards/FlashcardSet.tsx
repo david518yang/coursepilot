@@ -76,7 +76,7 @@ const FlashcardSet = ({ flashcardId }: { flashcardId: string }) => {
 
   return (
     <div className='grid grid-rows-[auto_1fr] h-screen bg-slate-200'>
-      <div className='sticky top-0 z-10 flex flex-row p-2 border-b bg-background gap-1'>
+      <div className='sticky top-0 z-10 flex flex-row p-2 border-b bg-sidebar gap-1'>
         <SidebarTrigger />
         <DocumentTitle documentId={flashcardId} documentTitle={title} documentType='flashcard' />
       </div>

@@ -7,7 +7,7 @@ import DocumentTitle from '../DocumentTitle';
 
 const EditorMenu = ({ editor, noteId, title }: { editor: Editor | null; noteId: string; title: string }) => {
   return (
-    <div className='sticky top-0 z-10 flex flex-row justify-between p-2 border-b bg-background'>
+    <div className='sticky top-0 z-10 p-2 border-b bg-background'>
       <div className='flex gap-1 items-center'>
         <SidebarTrigger />
         <DocumentTitle documentId={noteId} documentTitle={title} documentType='note' />

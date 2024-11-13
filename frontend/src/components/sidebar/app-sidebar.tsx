@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 
 import { CourseContentList } from '@/components/sidebar/course-content-list';
 import { NavUser } from '@/components/sidebar/nav-user';
@@ -14,7 +15,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible='icon' {...props}>
-      <SidebarHeader>
+      <SidebarHeader className='flex'>
+        <Image src='/coursepilot-wide-logo.png' className='p-1' alt='Logo' height={36} width={140} />
         <CourseSwitcher />
       </SidebarHeader>
       <SidebarContent>

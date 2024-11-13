@@ -65,7 +65,17 @@ const Autocomplete = Extension.create({
               const decoration = Decoration.widget(this.storage.autocompletePosition, () => {
                 const span = document.createElement('span');
                 span.innerHTML = this.storage.autocompleteSuggestion;
-                span.className = 'text-gray-300';
+                span.className = 'text-gray-300 transition all hover:text-gray-400 cursor-pointer';
+                span.onclick = () => {
+                  if (this.storage.autocompleteSuggestion) {
+                    this.editor.commands.insertContentAt(
+                      this.storage.autocompletePosition,
+                      this.storage.autocompleteSuggestion
+                    );
+                    this.storage.autocompleteSuggestion = '';
+                    this.storage.autocompletePosition = null;
+                  }
+                };
                 return span;
               });
               return DecorationSet.create(state.doc, [decoration]);

@@ -25,6 +25,7 @@ def insert_document_with_embeddings(input_data):
         print(f"An error occurred while inserting the document: {e}")
         return None
 
+
 def retrieve_document_by_vector(query_vector, num_results):
     query = {"$vectorSearch": {
         "queryVector": query_vector.tolist(),

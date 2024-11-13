@@ -5,14 +5,26 @@ import re
 
 # nltk.download('punkt')
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+"""
+    Chunk a document by sentences.
+    Parameters:
+        text: str
+    Returns:
+        List[str]: A list of sentences.
+"""
 def chunk_document_by_sentences(text):
     sentences = sent_tokenize(text)
-
     tokenized_sentences = [nltk.word_tokenize(sent) for sent in sentences]
-
     return sentences
 
-
+"""
+    Chunk a document by markdown headings.
+    Parameters:
+        markdown_content: str
+    Returns:
+        List[str]: A list of chunks.
+"""
 def chunk_document_with_md(markdown_content):
     heading_pattern = re.compile(r'^(#{1,6})\s*(.*)', re.MULTILINE)
     

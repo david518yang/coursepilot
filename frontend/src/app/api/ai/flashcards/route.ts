@@ -38,7 +38,8 @@ const MODEL = GEN_AI.getGenerativeModel({
   },
 });
 const PROMPT = `Generate flashcards for a set of notes. 
-  If you cannot provide flashcards, still attempt to return flashcards. 
+  If you cannot provide flashcards, still attempt to return flashcards.
+  Keep the title under 15 characters. 
   The current note content is: `;
 
 export async function POST(req: NextRequest) {

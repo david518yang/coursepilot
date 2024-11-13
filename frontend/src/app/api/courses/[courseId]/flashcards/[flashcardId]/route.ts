@@ -57,12 +57,12 @@ export async function PATCH(request: Request, { params }: { params: { courseId: 
   const updateFlashcardSetInCourse = async (
     courseId: string,
     flashcardId: string,
-    updatedContent: string,
-    userId: string
+    userId: string,
+    updatedTitle: string
   ): Promise<IFlashcardSetDocument | null> => {
     const flashcardSet = await FlashcardSet.findOneAndUpdate(
       { _id: flashcardId, courseId, userId },
-      { $set: { content: updatedContent } },
+      { $set: { title: updatedTitle } },
       { new: true }
     );
 
@@ -75,9 +75,13 @@ export async function PATCH(request: Request, { params }: { params: { courseId: 
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { content } = await request.json();
+  const { title } = await request.json();
 
-  const flashcardSet = await updateFlashcardSetInCourse(params.courseId, params.flashcardId, content, user.id);
+  if (title.length > 15) {
+    return Response.json({ error: 'Course title must be 15 characters or less' }, { status: 400 });
+  }
+
+  const flashcardSet = await updateFlashcardSetInCourse(params.courseId, params.flashcardId, user.id, title);
 
   if (!flashcardSet) {
     return Response.json({ error: 'Flashcard set not found or unauthorized' }, { status: 404 });

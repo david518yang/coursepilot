@@ -3,12 +3,15 @@ import EditorButton from './EditorButton';
 import HeadingPicker from './headingPicker/HeadingPicker';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import ExportButton from './ExportButton';
+import DocumentTitle from '../DocumentTitle';
 
-const EditorMenu = ({ editor }: { editor: Editor | null }) => {
+const EditorMenu = ({ editor, noteId, title }: { editor: Editor | null; noteId: string; title: string }) => {
   return (
     <div className='sticky top-0 z-10 flex flex-row justify-between p-2 border-b bg-background'>
       <div className='flex gap-1 items-center'>
         <SidebarTrigger />
+        <DocumentTitle documentId={noteId} documentTitle={title} documentType='note' />
         <div className='w-[1px] h-6 bg-gray-300' />
         <HeadingPicker editor={editor} />
         <EditorButton onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive('bold')}>
@@ -99,6 +102,7 @@ const EditorMenu = ({ editor }: { editor: Editor | null }) => {
             />
           </svg>
         </EditorButton>
+        <ExportButton noteTitle={title} editor={editor} />
       </div>
     </div>
   );

@@ -40,11 +40,15 @@ const CreateCourseDialog = ({ trigger, editing }: CreateCourseDialogProps) => {
     }
   }, [selectedCourse, selectedCourseObject]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editing && selectedCourseObject) {
       updateCourse(selectedCourseObject._id, { title: courseName, emoji: selectedEmoji });
     } else {
-      addCourse(courseName, selectedEmoji);
+      const courseId = await addCourse(courseName, selectedEmoji);
+
+      if (courseId) {
+        window.location.href = `/courses/${courseId}`;
+      }
     }
     setDialogIsOpen(false);
   };

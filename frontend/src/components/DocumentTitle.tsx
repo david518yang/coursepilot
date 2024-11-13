@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 import useSWR from 'swr';
@@ -14,14 +16,6 @@ const DocumentTitle = ({
   documentTitle: string;
   documentType: string;
 }) => {
-  if (documentType !== 'flashcard' && documentType !== 'note') {
-    throw new Error('Invalid document type');
-  }
-
-  if (!documentId) {
-    return null;
-  }
-
   const [title, setTitle] = useState(documentTitle || '');
   const [previousTitle, setPreviousTitle] = useState(documentTitle || '');
   const { selectedCourse } = useCoursesContext();
@@ -33,6 +27,14 @@ const DocumentTitle = ({
   useEffect(() => {
     setTitle(documentTitle);
   }, [documentTitle]);
+
+  if (documentType !== 'flashcard' && documentType !== 'note') {
+    throw new Error('Invalid document type');
+  }
+
+  if (!documentId) {
+    return null;
+  }
 
   const saveTitle = async () => {
     if (title.length <= 0) {

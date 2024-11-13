@@ -82,7 +82,11 @@ export function NavUser() {
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onClick={() => {
-                    toggleSidebar();
+                    // Toggle sidebar if on mobile
+                    if (window.innerWidth < 768) {
+                      toggleSidebar();
+                    }
+
                     openUserProfile();
                   }}
                 >

@@ -50,7 +50,7 @@ export async function DELETE(request: Request, { params }: { params: { courseId:
 }
 
 export async function PATCH(request: Request, { params }: { params: { courseId: string; noteId: string } }) {
-  const updateNoteInCourse = async (
+  const updateNoteContent = async (
     courseId: string,
     noteId: string,
     updatedContent: string,
@@ -65,19 +65,48 @@ export async function PATCH(request: Request, { params }: { params: { courseId: 
     return note;
   };
 
+  const updateNoteTitle = async (
+    courseId: string,
+    noteId: string,
+    newTitle: string,
+    userId: string
+  ): Promise<INoteDocument | null> => {
+    const note = await Note.findOneAndUpdate(
+      { _id: noteId, courseId, userId },
+      { $set: { title: newTitle } },
+      { new: true }
+    );
+
+    return note;
+  };
+
   const user = await currentUser();
 
   if (!user || !user.id) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { content } = await request.json();
+  const { content, title } = await request.json();
 
-  const note = await updateNoteInCourse(params.courseId, params.noteId, content, user.id);
+  if (content) {
+    const note = await updateNoteContent(params.courseId, params.noteId, content, user.id);
 
-  if (!note) {
-    return Response.json({ error: 'Note not found or unauthorized' }, { status: 404 });
+    if (!note) {
+      return Response.json({ error: 'Note not found or unauthorized' }, { status: 404 });
+    }
+
+    return Response.json({ message: 'Note updated successfully', note }, { status: 200 });
   }
 
-  return Response.json({ message: 'Note updated successfully', note }, { status: 200 });
+  if (title) {
+    const note = await updateNoteTitle(params.courseId, params.noteId, title, user.id);
+
+    if (!note) {
+      return Response.json({ error: 'Note not found or unauthorized' }, { status: 404 });
+    }
+
+    return Response.json({ message: 'Note updated successfully', note }, { status: 200 });
+  }
+
+  return Response.json({ message: 'Invalid params' }, { status: 400 });
 }

@@ -200,13 +200,9 @@ export function CourseContentList() {
                 );
               })) || (
               <SidebarMenuItem key={`skeleton`} className='flex items-center gap-0.5'>
-                <div className='w-full flex justify-between items-center bg-gray-100 rounded-md p-2 py-3'>
-                  <div className='flex items-center'>
-                    <div className='w-6 h-6 bg-gray-200 rounded-full mr-2'></div>
-                    <div className='flex flex-col space-y-1'>
-                      <div className='h-4 bg-gray-200 rounded w-16' />
-                      <div className='h-3 bg-gray-200 rounded w-24' />
-                    </div>
+                <div className='w-full flex justify-between items-center border-2 border-dashed border-gray-200 rounded-md p-2 py-3'>
+                  <div className='flex items-center p-1'>
+                    <div className='text-xs text-gray-400'>Create your first document</div>
                   </div>
                   <div>
                     <svg

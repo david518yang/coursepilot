@@ -23,6 +23,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,6 +59,7 @@ export function CourseContentList() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams<{ courseId: string; noteId: string }>();
+  const { state } = useSidebar();
 
   const selectedCourse = params.courseId;
 
@@ -198,7 +200,8 @@ export function CourseContentList() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
-              })) || (
+              })) ||
+            (state === 'expanded' && (
               <SidebarMenuItem key={`skeleton`} className='flex items-center gap-0.5'>
                 <div className='w-full flex justify-between items-center border-2 border-dashed border-gray-200 rounded-md p-2 py-3'>
                   <div className='flex items-center p-1'>
@@ -222,7 +225,7 @@ export function CourseContentList() {
                   </div>
                 </div>
               </SidebarMenuItem>
-            )}
+            ))}
       </SidebarMenu>
     </SidebarGroup>
   );

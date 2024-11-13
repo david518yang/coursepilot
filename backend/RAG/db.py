@@ -1,21 +1,24 @@
 import pymongo
+import gridfs
 import numpy
 from dotenv import load_dotenv
+from bson.objectid import ObjectId
 import os
 
 load_dotenv()
 uri = os.getenv("MONGODB_URI")
 client = pymongo.MongoClient(uri)
-db = client.Documents_and_Embeddings
-collection = db.documents
 
 def insert_document_with_embeddings(input_data):
+    db = client.Documents_and_Embeddings
+    collection = db.documents
     embedding = input_data["embedding"].tolist() if isinstance(input_data["embedding"], numpy.ndarray) else input_data 
 
     document = {
         "title": input_data["title"],
         "text": input_data["text"],
-        "embedding": embedding
+        "embedding": embedding,
+        "userId": input_data["userId"]
     }
     try:
         result = collection.insert_one(document)
@@ -25,8 +28,16 @@ def insert_document_with_embeddings(input_data):
         print(f"An error occurred while inserting the document: {e}")
         return None
 
+def store_pdf(pdf, input_data):
+    db = client.Courses
+    collection = db.pdfs
+    fs = gridfs.GridFS(db)
+    pdf_id = fs.put(pdf, filename = input_data["title"], metadata=input_data)
+    return str(pdf_id)
 
 def retrieve_document_by_vector(query_vector, num_results):
+    db = client.Documents_and_Embeddings
+    collection = db.documents
     query = {"$vectorSearch": {
         "queryVector": query_vector.tolist(),
         "path": "embedding",

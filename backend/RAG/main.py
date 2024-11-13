@@ -21,17 +21,18 @@ def main():
         document_title: str
         chunks: List[str]
 """
-def embed_and_store_docs(document_title, chunks):
-    embeddings = get_bert_embeddings(chunks)
-    for i in range(len(chunks)):
+def embed_and_store_docs(input_data):
+    embeddings = get_bert_embeddings(input_data["chunks"])
+    for i in range(len(input_data["chunks"])):
         input_data = {
-            "title": f"{document_title} - {i}",
-            "text": chunks[i],
-            "embedding": embeddings[i]
+            "title": f"{input_data["title"]} - {i}",
+            "text": input_data["chunks"][i],
+            "embedding": embeddings[i],
+            "userId": input_data["userId"],
+            "courseId": input_data["courseId"]
         }
         insert_document_with_embeddings(input_data)
         
-    #call cosine similarity to group sentences into chunks
     
 
 """
@@ -46,4 +47,4 @@ def query(query, num_results):
     for document in results:
         print(document["text"])
 
-main()
+# main()

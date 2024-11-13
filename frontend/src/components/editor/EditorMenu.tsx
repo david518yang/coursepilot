@@ -102,7 +102,7 @@ const EditorMenu = ({ editor, noteId, title }: { editor: Editor | null; noteId: 
             />
           </svg>
         </EditorButton>
-        <ExportButton noteTitle='' />
+        <ExportButton noteTitle={title} editor={editor} />
       </div>
     </div>
   );

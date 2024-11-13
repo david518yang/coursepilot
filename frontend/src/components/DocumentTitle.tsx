@@ -1,31 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 import { IFlashcardSetDocument } from '@/lib/models/Flashcard';
+import { INoteDocument } from '@/lib/models/Note';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/utils';
-import FlashcardCarousel from './FlashcardCarousel';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { SidebarItem } from '@/components/sidebar/course-content-list';
 import { Input } from '@/components/ui/input';
-import DocumentTitle from '../DocumentTitle';
 
-const FlashcardSet = ({ flashcardId }: { flashcardId: string }) => {
+const DocumentTitle = ({
+  documentId,
+  documentTitle,
+  documentType,
+}: {
+  documentId: string;
+  documentTitle: string;
+  documentType: string;
+}) => {
+  if (documentType !== 'flashcard' && documentType !== 'note') {
+    throw new Error('Invalid document type');
+  }
+
+  if (!documentId) {
+    return null;
+  }
+
+  const [title, setTitle] = useState(documentTitle || '');
+  const [previousTitle, setPreviousTitle] = useState(documentTitle || '');
   const { selectedCourse } = useCoursesContext();
-
-  const { data: flashcardSet } = useSWR<IFlashcardSetDocument>(
-    selectedCourse && flashcardId && `/api/courses/${selectedCourse}/flashcards/${flashcardId}`,
-    fetcher
-  );
-
   const { data: sidebarItems, mutate } = useSWR<SidebarItem[]>(
     selectedCourse ? `/api/courses/${selectedCourse}/documents` : null,
     fetcher
   );
 
-  const [title, setTitle] = useState(flashcardSet?.title || '');
+  useEffect(() => {
+    setTitle(documentTitle);
+  }, [documentTitle]);
 
   const saveTitle = async () => {
-    const res = await fetch(`/api/courses/${selectedCourse}/flashcards/${flashcardId}`, {
+    if (title.length <= 0) {
+      setTitle(previousTitle);
+      return;
+    }
+    const res = await fetch(`/api/courses/${selectedCourse}/${documentType}s/${documentId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -39,15 +55,17 @@ const FlashcardSet = ({ flashcardId }: { flashcardId: string }) => {
       return;
     }
 
+    setPreviousTitle(title);
+
     const updatedSidebarItem = {
       title,
-      type: 'flashcard',
-      _id: flashcardId,
-      url: `/courses/${selectedCourse}/flashcards/${flashcardId}`,
+      type: documentType,
+      _id: documentId,
+      url: `/courses/${selectedCourse}/${documentType}s/${documentId}`,
       updatedAt: new Date().toISOString(),
     } as SidebarItem;
     mutate(
-      sidebarItems?.map(item => (item._id === flashcardId ? updatedSidebarItem : item)),
+      sidebarItems?.map(item => (item._id === documentId ? updatedSidebarItem : item)),
       false
     );
   };
@@ -68,25 +86,17 @@ const FlashcardSet = ({ flashcardId }: { flashcardId: string }) => {
     saveTitle();
   };
 
-  useEffect(() => {
-    if (flashcardSet) {
-      setTitle(flashcardSet.title);
-    }
-  }, [flashcardSet]);
-
   return (
-    <div className='grid grid-rows-[auto_1fr] h-screen bg-slate-200'>
-      <div className='sticky top-0 z-10 flex flex-row p-2 border-b bg-background gap-1'>
-        <SidebarTrigger />
-        <DocumentTitle documentId={flashcardId} documentTitle={title} documentType='flashcard' />
-      </div>
-      {flashcardSet && (
-        <div className='flex flex-col my-auto w-full items-center gap-4'>
-          <FlashcardCarousel flashcards={flashcardSet.flashcards} />
-        </div>
-      )}
-    </div>
+    <Input
+      className='h-full w-36'
+      type='text'
+      value={title}
+      onChange={handleTitleChange}
+      onBlur={handleTitleBlur}
+      onKeyDown={handleTitleKeyDown}
+      disabled={!documentTitle}
+    />
   );
 };
 
-export default FlashcardSet;
+export default DocumentTitle;

@@ -6,6 +6,8 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/utils';
 import { SidebarItem } from '@/components/sidebar/course-content-list';
 import { Input } from '@/components/ui/input';
+import { useParams } from 'next/navigation';
+import clsx from 'clsx';
 
 const DocumentTitle = ({
   documentId,
@@ -24,6 +26,8 @@ const DocumentTitle = ({
     fetcher
   );
 
+  const { flashcardId } = useParams<{ flashcardId: string }>();
+
   useEffect(() => {
     setTitle(documentTitle);
   }, [documentTitle]);
@@ -37,10 +41,14 @@ const DocumentTitle = ({
   }
 
   const saveTitle = async () => {
+    if (title === previousTitle) {
+      return;
+    }
     if (title.length <= 0) {
       setTitle(previousTitle);
       return;
     }
+
     const res = await fetch(`/api/courses/${selectedCourse}/${documentType}s/${documentId}`, {
       method: 'PATCH',
       headers: {
@@ -88,7 +96,7 @@ const DocumentTitle = ({
 
   return (
     <Input
-      className='h-full bg-background w-20 sm:w-36'
+      className={clsx('h-full bg-background sm:w-36', !flashcardId ? 'w-20' : 'w-36')}
       type='text'
       value={title}
       onChange={handleTitleChange}

@@ -6,6 +6,8 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/utils';
 import { SidebarItem } from '@/components/sidebar/course-content-list';
 import { Input } from '@/components/ui/input';
+import { useParams } from 'next/navigation';
+import clsx from 'clsx';
 
 const DocumentTitle = ({
   documentId,
@@ -23,6 +25,8 @@ const DocumentTitle = ({
     selectedCourse ? `/api/courses/${selectedCourse}/documents` : null,
     fetcher
   );
+
+  const { flashcardId } = useParams<{ flashcardId: string }>();
 
   useEffect(() => {
     setTitle(documentTitle);
@@ -88,7 +92,7 @@ const DocumentTitle = ({
 
   return (
     <Input
-      className='h-full w-20 sm:w-36'
+      className={clsx('h-full sm:w-36', !flashcardId ? 'w-20' : 'w-36')}
       type='text'
       value={title}
       onChange={handleTitleChange}

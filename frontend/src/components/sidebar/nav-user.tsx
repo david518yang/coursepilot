@@ -17,9 +17,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import { useSidebar } from '@/components/ui/sidebar';
+
 export function NavUser() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { openUserProfile, signOut } = useClerk();
+
+  const { toggleSidebar } = useSidebar();
 
   if (!isLoaded || !isSignedIn) {
     return null;
@@ -78,6 +82,7 @@ export function NavUser() {
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onClick={() => {
+                    toggleSidebar();
                     openUserProfile();
                   }}
                 >

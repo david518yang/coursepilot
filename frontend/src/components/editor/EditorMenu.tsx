@@ -3,6 +3,7 @@ import EditorButton from './EditorButton';
 import HeadingPicker from './headingPicker/HeadingPicker';
 
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import ExportButton from './ExportButton';
 
 const EditorMenu = ({ editor }: { editor: Editor | null }) => {
   return (
@@ -99,6 +100,7 @@ const EditorMenu = ({ editor }: { editor: Editor | null }) => {
             />
           </svg>
         </EditorButton>
+        <ExportButton noteTitle='' />
       </div>
     </div>
   );

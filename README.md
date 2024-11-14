@@ -1,4 +1,7 @@
+<div style="display: flex; flex-direction: column;">
+<img src="frontend/public/favicon.svg" height="64"/>
 <h1 align="center">coursepilot</h1>
+</div>
 
 > accelerate your note taking
 

@@ -4,6 +4,7 @@ import { Plugin, PluginKey } from '@tiptap/pm/state';
 
 const AUTOCOMPLETE_PLUGIN_KEY = new PluginKey('autocomplete');
 const AUTOCOMPLETE_DEBOUNCE_TIME = 500;
+const AUTOCOMPLETE_CONTEXT_LENGTH = 1000;
 
 const getAutocompletedText = async (prefix: string) => {
   const autocompletedText = await fetch('/api/ai/autocomplete', {
@@ -88,6 +89,7 @@ const Autocomplete = Extension.create({
   },
 
   onUpdate() {
+    // Generate autocomplete suggestion when the user finishes typing
     clearTimeout(this.storage.autocompleteDebouncer);
     if (this.storage.autocompleteSuggestion) {
       this.storage.autocompleteSuggestion = '';
@@ -99,7 +101,9 @@ const Autocomplete = Extension.create({
       const { from } = state.selection;
       const text = this.editor.getText();
       if (text) {
-        const completedText = await getAutocompletedText(text);
+        const start = from - AUTOCOMPLETE_CONTEXT_LENGTH > 0 ? from - AUTOCOMPLETE_CONTEXT_LENGTH : 0;
+        const prefix = text.slice(start, from);
+        const completedText = await getAutocompletedText(prefix);
         if (!completedText) return;
         const sanitizedText = sanitizeText(completedText);
         this.storage.autocompleteSuggestion = sanitizedText;
@@ -107,6 +111,26 @@ const Autocomplete = Extension.create({
         view.dispatch(view.state.tr);
       }
     }, AUTOCOMPLETE_DEBOUNCE_TIME);
+  },
+
+  onSelectionUpdate() {
+    // Clear autocomplete suggestion when the anchor is moved
+    clearTimeout(this.storage.autocompleteDebouncer);
+    if (this.storage.autocompleteSuggestion) {
+      this.storage.autocompleteSuggestion = '';
+      this.storage.autocompletePosition = null;
+      this.editor.view.dispatch(this.editor.view.state.tr);
+    }
+  },
+
+  onDestroy() {
+    // Clear autocomplete suggestion when switching to another note
+    clearTimeout(this.storage.autocompleteDebouncer);
+    if (this.storage.autocompleteSuggestion) {
+      this.storage.autocompleteSuggestion = '';
+      this.storage.autocompletePosition = null;
+      this.editor.view.dispatch(this.editor.view.state.tr);
+    }
   },
 });
 

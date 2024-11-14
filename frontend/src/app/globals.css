@@ -16,6 +16,15 @@
   .prose p {
     margin: 0;
   }
+  .prose ul,
+  .prose ol {
+    padding: 0 0 0 16px;
+  }
+  .prose h1,
+  .prose h2,
+  .prose h3 {
+    margin: 0 0 16px 0px;
+  }
 }
 
 @layer base {

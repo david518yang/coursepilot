@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import EditorButton from './EditorButton';
 import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 import { Editor } from '@tiptap/react';
 
 const ExportButton = ({ noteTitle, editor }: { noteTitle: string; editor: Editor | null }) => {
@@ -9,36 +8,71 @@ const ExportButton = ({ noteTitle, editor }: { noteTitle: string; editor: Editor
 
   if (!editor) return null;
 
-  const exportToPDF = async () => {
-    const element = document.querySelector('.ProseMirror') as HTMLElement;
-    if (!element) return;
-
-    setExporting(true);
-
-    // Emit an update event to force a rerender of the editor
-    editor.emit('update', { editor: editor, transaction: editor.state.tr });
-
-    const canvas = await html2canvas(element, { scale: 2 });
-    const imgData = canvas.toDataURL('image/jpeg', 1);
-    const pdf = new jsPDF('p', 'mm', 'letter');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const imgProps = pdf.getImageProperties(imgData);
-    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-    heightLeft -= pdfHeight;
-
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pdfHeight;
+  const nodeToText = (node: ChildNode) => {
+    let formattedHTML = '';
+    if (node.nodeName === 'P') {
+      if (node.textContent) {
+        formattedHTML += node.textContent + '\n';
+      } else {
+        formattedHTML += '\n';
+      }
     }
+    if (node.nodeName === 'H1') {
+      formattedHTML += `\n# ${node.textContent}\n`;
+    }
+    if (node.nodeName === 'H2') {
+      formattedHTML += `\n## ${node.textContent}\n`;
+    }
+    if (node.nodeName === 'H3') {
+      formattedHTML += `\n### ${node.textContent}\n`;
+    }
+    if (node.nodeName === 'UL') {
+      node.childNodes.forEach(child => {
+        if (child.nodeName === 'LI') {
+          formattedHTML += `- ${child.textContent}\n`;
+        }
+      });
+    }
+    if (node.nodeName === 'OL') {
+      let index = 1;
+      node.childNodes.forEach(child => {
+        if (child.nodeName === 'LI') {
+          formattedHTML += `${index}. ${child.textContent}\n`;
+          index++;
+        }
+      });
+    }
+    if (node.nodeName === 'STRONG') {
+      formattedHTML += `**${node.textContent}**`;
+    }
+    if (node.nodeName === 'EM') {
+      formattedHTML += `*${node.textContent}*`;
+    }
+    if (node.nodeName === 'U') {
+      formattedHTML += `__${node.textContent}__`;
+    }
+    return formattedHTML;
+  };
 
+  const formatHTML = (html: string) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    let formattedHTML = '';
+    doc.body.childNodes.forEach(node => {
+      formattedHTML += nodeToText(node);
+    });
+
+    return formattedHTML;
+  };
+
+  const exportToPDF = async () => {
+    setExporting(true);
+    const content = formatHTML(editor.getHTML());
+
+    const pdf = new jsPDF('p', 'mm', 'letter');
+    pdf.setFontSize(12);
+    pdf.text(content, 16, 16, { maxWidth: 184 });
     pdf.save(`${noteTitle || 'document'}.pdf`);
     setExporting(false);
   };

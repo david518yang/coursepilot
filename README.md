@@ -29,7 +29,7 @@ Production: [coursepilot](https://coursepilot-0373030cb9f8.herokuapp.com/)
 
 #### Requirements
 
-- [Node.js]()
+- [Node.js](https://nodejs.org/en)
 - [pnpm](https://pnpm.io/installation)
 
 after cloning the repo, navigate into `/frontend` and run

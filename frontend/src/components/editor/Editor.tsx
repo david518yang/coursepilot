@@ -61,9 +61,10 @@ const Editor = ({ noteId }: { noteId: string }) => {
     ],
     editorProps: {
       attributes: {
-        class: 'prose p-4 m-0 h-full w-full max-w-none break-all focus:outline-none',
+        class: 'prose p-4 m-0 h-full w-full max-w-none break-word focus:outline-none',
       },
     },
+    immediatelyRender: false,
     autofocus: true,
     content: note?.content,
     onUpdate: ({ editor }) => {

@@ -3,8 +3,10 @@ import { ICourseWithNotes } from '@/lib/models/Course';
 import { INoteLean } from '../models/Note';
 
 interface CoursesContextType {
+  selectedCourse: string;
+  setSelectedCourse: (courseId: string) => void;
   courses: ICourseWithNotes[];
-  addCourse: (course: string, userId: string) => void;
+  addCourse: (course: string, userId: string) => Promise<string | undefined>;
   updateCourse: (courseId: string, updatedCourse: Partial<ICourseWithNotes>) => void;
   deleteCourse: (courseId: string) => void;
   addNote: (courseId: string, note: INoteLean) => void;
@@ -19,8 +21,9 @@ export const CoursesProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ initialCourses, children }) => {
   const [courses, setCourses] = useState<ICourseWithNotes[]>(initialCourses);
+  const [selectedCourse, setSelectedCourse] = useState<string>('');
 
-  const addCourse = useCallback(async (title: string, emoji: string) => {
+  const addCourse = useCallback(async (title: string, emoji: string): Promise<string | undefined> => {
     try {
       const response = await fetch('/api/courses/create', {
         method: 'POST',
@@ -54,6 +57,8 @@ export const CoursesProvider: React.FC<{
           notes: [],
         },
       ]);
+
+      return newCourse._id;
     } catch (error) {
       console.error('Error adding course:', error);
     }
@@ -133,6 +138,8 @@ export const CoursesProvider: React.FC<{
   return (
     <CoursesContext.Provider
       value={{
+        selectedCourse,
+        setSelectedCourse,
         courses,
         addCourse,
         updateCourse,

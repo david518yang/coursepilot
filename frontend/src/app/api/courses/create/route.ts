@@ -2,7 +2,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import Course, { ICourseDocument } from '@/lib/models/Course';
 
 export async function POST(request: Request) {
-  const addNoteToDb = async (title: string, emoji: string, userId: string): Promise<ICourseDocument> => {
+  const addCourseToDb = async (title: string, emoji: string, userId: string): Promise<ICourseDocument> => {
     const newCourse = new Course({
       title,
       emoji: emoji,
@@ -26,7 +26,11 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Invalid request' }, { status: 400 });
   }
 
-  const note = await addNoteToDb(title, emoji, user.id);
+  if (title.length > 15) {
+    return Response.json({ error: 'Course title must be 15 characters or less' }, { status: 400 });
+  }
+
+  const note = await addCourseToDb(title, emoji, user.id);
 
   return Response.json({
     _id: note._id,

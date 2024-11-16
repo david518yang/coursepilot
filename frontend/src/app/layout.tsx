@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider signInFallbackRedirectUrl='/editor' signUpFallbackRedirectUrl='/editor'>
+    <ClerkProvider signInFallbackRedirectUrl='/courses' signUpFallbackRedirectUrl='/courses'>
       <html lang='en' className={`${lexend.className}`}>
         <body>{children}</body>
       </html>

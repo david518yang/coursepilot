@@ -2,8 +2,9 @@
 
 import { CoursesProvider } from '@/lib/hooks/useCourseContext';
 import { ICourseWithNotes } from '@/lib/models/Course';
-
-import Sidebar from '@/components/Sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/sidebar/app-sidebar';
+import { useParams } from 'next/navigation';
 
 export function ProviderWrapper({
   children,
@@ -14,12 +15,10 @@ export function ProviderWrapper({
 }) {
   return (
     <CoursesProvider initialCourses={initialCourses}>
-      <div className='h-screen flex'>
-        <Sidebar />
-        <div className='flex-1'>
-          <main className='w-full h-full overflow-auto'>{children}</main>
-        </div>
-      </div>
+      <SidebarProvider>
+        <AppSidebar />
+        <main className='w-full h-screen overflow-auto'>{children}</main>
+      </SidebarProvider>
     </CoursesProvider>
   );
 }

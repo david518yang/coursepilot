@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import {
   Dialog,
   DialogTrigger,
@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'; // Adjust imports to your Dialog component setup
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -24,18 +24,31 @@ interface CreateCourseDialogProps {
   course?: ICourseWithNotes;
 }
 
-const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({ trigger, editing, course }) => {
-  const { addCourse, updateCourse, deleteCourse } = useCoursesContext();
+const CreateCourseDialog = ({ trigger, editing }: CreateCourseDialogProps) => {
+  const { addCourse, updateCourse, deleteCourse, selectedCourse, courses } = useCoursesContext();
 
-  const [courseName, setCourseName] = useState<string>(course?.title || '');
-  const [selectedEmoji, setSelectedEmoji] = useState<string>(course?.emoji || '📝');
+  const selectedCourseObject = courses.find(course => course._id === selectedCourse);
+
+  const [courseName, setCourseName] = useState<string>('');
+  const [selectedEmoji, setSelectedEmoji] = useState<string>('📝');
   const [dialogIsOpen, setDialogIsOpen] = useState<boolean>(false);
 
-  const handleSave = () => {
-    if (editing && course) {
-      updateCourse(course._id, { title: courseName, emoji: selectedEmoji });
+  useEffect(() => {
+    if (selectedCourse) {
+      setCourseName(selectedCourseObject?.title || '');
+      setSelectedEmoji(selectedCourseObject?.emoji || '📝');
+    }
+  }, [selectedCourse, selectedCourseObject]);
+
+  const handleSave = async () => {
+    if (editing && selectedCourseObject) {
+      updateCourse(selectedCourseObject._id, { title: courseName, emoji: selectedEmoji });
     } else {
-      addCourse(courseName, selectedEmoji);
+      const courseId = await addCourse(courseName, selectedEmoji);
+
+      if (courseId) {
+        window.location.href = `/courses/${courseId}`;
+      }
     }
     setDialogIsOpen(false);
   };
@@ -67,10 +80,15 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({ trigger, editin
               <EmojiPicker selectedEmoji={selectedEmoji} setSelectedEmoji={setSelectedEmoji} />
             </div>
           </div>
+          {courseName.length > 15 && (
+            <p className='text-red-500 text-sm pt-2 sm:pt-0 sm:mx-0 my-auto ml-auto'>
+              Course name must be 15 characters or less
+            </p>
+          )}
         </div>
         <DialogFooter>
           <div className='flex items-center gap-2'>
-            {editing && course && (
+            {editing && selectedCourseObject && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button onClick={() => {}} variant='destructive' className='mr-auto'>
@@ -79,15 +97,16 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({ trigger, editin
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Delete {course?.title}</DialogTitle>
+                    <DialogTitle>Delete {selectedCourseObject?.title}</DialogTitle>
                   </DialogHeader>
                   <DialogDescription>Are you sure you want to delete this course?</DialogDescription>
                   <DialogFooter>
                     <Button
                       onClick={() => {
-                        if (course) {
-                          deleteCourse(course._id);
+                        if (selectedCourseObject) {
+                          deleteCourse(selectedCourseObject._id);
                           setDialogIsOpen(false);
+                          window.location.href = '/courses';
                         }
                       }}
                       variant='destructive'

@@ -1,0 +1,32 @@
+
+Essay Feedback
+Homework Assignment #1
+CMSI 4071 Fall 2024
+======================
+
+SUMMARY:
+   Excellent summary of the article, you hit all the author's main
+   points!
+
+CRITICAL THINKING:
+   Relation to S/W engineering:
+      Good point about the need to manage large code bases, and using AI
+      to parse search results.  These are areas where AI can shine, but I
+      agree there still needs to be human oversight.
+
+   Thoughts/opinions presented:
+      Nice job forecasting and including your personal experience.
+
+OVERALL ASSESSMENT:
+   Category                          Points
+   Summary of article                  25
+   Relation to S/W engineering         25
+   Thoughts/opinions presented         25
+   Spelling/Grammar                    25
+                                     -----
+   Subtotal                           100
+   ------------------------------------------------------
+   Total Percentage:   100 out of 100 which is an A-plus
+
+
+

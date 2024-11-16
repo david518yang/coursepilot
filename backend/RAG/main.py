@@ -3,6 +3,7 @@ from .db import insert_document_with_embeddings, retrieve_document_by_vector
 from .document_chunker import semantic_chunk_with_gemini, chunk_document_by_sentences
 from .parse import parse
 
+
 """
     Embed and store the documents in the database.
     Parameters:

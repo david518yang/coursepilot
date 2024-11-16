@@ -51,6 +51,7 @@ def index():
     return jsonify({'message': 'Hello from Flask!'})
 
 @app.route('/get_documents', methods=['GET'])
+
 def fetch_documents():
     search_string = request.args.get('search')
     
@@ -166,6 +167,7 @@ def get_task_status(task_id):
     elif task.state == 'SUCCESS':
         response['result'] = task.get()
     return jsonify(response)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

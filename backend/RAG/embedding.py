@@ -1,11 +1,29 @@
 from transformers import BertTokenizer, BertModel
 import torch
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertModel.from_pretrained('bert-base-uncased')
-model.eval()
+# Global variables for lazy loading
+_model = None
+_tokenizer = None
+_model_lock = threading.Lock()
+
+def get_tokenizer():
+    global _tokenizer
+    if _tokenizer is None:
+        _tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    return _tokenizer
+
+def get_model():
+    global _model
+    if _model is None:
+        with _model_lock:
+            if _model is None:  # Double-check pattern
+                device = torch.device("cpu")  # Force CPU
+                _model = BertModel.from_pretrained('bert-base-uncased')
+                _model.eval()
+                torch.set_grad_enabled(False)  # Disable gradients
+    return _model
 
 """
     Assemble batches of sentences to optimize the number of tokens in each batch.
@@ -19,7 +37,7 @@ def assemble_batch(sentences, max_tokens=512):
     current_batch = []
     current_token_count = 0
     batches = []
-    tokenized_sentences = [(sentence, len(tokenizer.encode(sentence, add_special_tokens=True))) 
+    tokenized_sentences = [(sentence, len(get_tokenizer().encode(sentence, add_special_tokens=True))) 
                           for sentence in sentences]
 
     for sentence, token_count in tokenized_sentences:
@@ -47,17 +65,20 @@ def assemble_batch(sentences, max_tokens=512):
         np.ndarray: A numpy array of embeddings.
 """
 def embed(batch):
+    tokenizer = get_tokenizer()
+    model = get_model()
     inputs = tokenizer(batch, return_tensors='pt', truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         outputs = model(**inputs)
-        batch_embeddings = outputs.last_hidden_state.mean(dim=1).numpy()
-    return batch_embeddings
+    return outputs.last_hidden_state[:, 0, :].numpy()
 
 def single_embed(sentence):
+    tokenizer = get_tokenizer()
+    model = get_model()
     inputs = tokenizer(sentence, return_tensors='pt', truncation=True, padding=True, max_length=512)
     with torch.no_grad():
         outputs = model(**inputs)
-        embedding = outputs.last_hidden_state.mean(dim=1).numpy()
+        embedding = outputs.last_hidden_state[0, 0, :].numpy()
     return embedding
 
 """
@@ -71,7 +92,7 @@ def single_embed(sentence):
 def get_bert_embeddings(sentences, max_tokens=512):
     batches = assemble_batch(sentences, max_tokens)
     embeddings = []
-    with ProcessPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         for batch_embeddings in executor.map(embed, batches):
             embeddings.extend(batch_embeddings)
     return embeddings

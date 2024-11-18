@@ -25,7 +25,7 @@ import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 import { useParams } from 'next/navigation';
 
 export function CourseSwitcher() {
-  const { isMobile } = useSidebar();
+  const { isMobile, state } = useSidebar();
   const { courses } = useCoursesContext();
 
   const params = useParams<{ courseId: string; noteId: string }>();
@@ -138,7 +138,7 @@ export function CourseSwitcher() {
         <CourseDialog
           trigger={
             <Button size='icon' variant='ghost' className='aspect-square w-7 h-7'>
-              <Settings className='h-4 w-4' />
+              {state === 'expanded' && <Settings className='h-4 w-4' />}
             </Button>
           }
           editing={true}

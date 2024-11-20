@@ -33,15 +33,30 @@ const useGenerateQuiz = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate quiz');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to generate quiz';
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
 
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid response format from server');
+      }
+
       setQuizData(data);
     } catch (err) {
       console.error('Error generating quiz:', err);
-      setError('Failed to generate quiz. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to generate quiz. Please try again.');
+      setQuizData([]); // Clear any existing quiz data on error
     } finally {
       setIsGenerating(false);
     }

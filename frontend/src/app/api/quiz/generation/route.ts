@@ -89,6 +89,36 @@ export async function POST(req: NextRequest) {
 
   const questionDistribution = await distributeQuestions(numQuestions, formats, subject, topic);
 
+  const topicDocuments: Record<string, string[]> = {};
+  const allTopics = new Set<string>();
+  Object.values(questionDistribution).forEach(format => {
+    format.topics.forEach(topic => allTopics.add(topic));
+  });
+
+  try {
+    await Promise.all(Array.from(allTopics).map(async (topicItem) => {
+      const simplifiedTopic = topicItem.split('(')[0].split(',')[0].trim();
+      
+      const flaskResponse = await fetch(`http://157.245.2.33/get_documents?search=${encodeURIComponent(simplifiedTopic)}`, {
+        method: 'POST'
+      });
+      
+      if (!flaskResponse.ok) {
+        throw new Error(`Failed to fetch documents for topic: ${topicItem}`);
+      }
+  
+      const documents = await flaskResponse.json();
+      topicDocuments[topicItem] = documents;
+      console.log(`Fetched documents for topic: ${topicItem}`, documents);
+    }));
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    // Continue with quiz generation even if document fetching fails
+  }
+  
+  // Now topicDocuments contains a mapping of each topic to its relevant documents
+  console.log('Topic to documents mapping:', topicDocuments);
+
   const formatSpecificPrompts = {
     'multiple choice': `Generate exactly ${questionDistribution['multiple choice'].numQuestions} multiple choice question(s) about ${questionDistribution['multiple choice'].topics.join(', ')} in ${subject}. For each question:
 - Make the question clear and specific

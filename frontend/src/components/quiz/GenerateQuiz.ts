@@ -35,14 +35,14 @@ const useGenerateQuiz = () => {
       if (!response.ok) {
         const errorText = await response.text();
         let errorMessage = 'Failed to generate quiz';
-        
+
         try {
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.error || errorMessage;
         } catch {
           errorMessage = errorText || errorMessage;
         }
-        
+
         throw new Error(errorMessage);
       }
 

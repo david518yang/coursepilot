@@ -269,19 +269,23 @@ Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "an
         });
 
         console.log('Quiz saved successfully:', quiz);
-        return NextResponse.json(quizData);
+        return NextResponse.json({
+          _id: quiz._id.toString(),
+          questions: quizData
+        });
       } catch (dbError) {
         console.error('MongoDB Error:', dbError);
         throw new Error('Failed to save quiz to database');
       }
 
-      return NextResponse.json(
-        quizData.map(q => ({
+      return NextResponse.json({
+        _id: new mongoose.Types.ObjectId().toString(),
+        questions: quizData.map(q => ({
           ...q,
           answers: Array.isArray(q.answers) ? q.answers : q.answers || undefined,
           correct_answers: Array.isArray(q.correct_answers) ? q.correct_answers : q.correct_answers || undefined,
         }))
-      );
+      });
     } catch (error) {
       console.error('Error generating quiz:', error);
       return NextResponse.json(

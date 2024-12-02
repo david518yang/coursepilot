@@ -7,6 +7,11 @@ export interface QuizQuestion<A, C> {
   format: 'multiple choice' | 'select all' | 'true false' | 'short answer' | 'fill in the blank' | 'matching';
 }
 
+export interface QuizData {
+  _id: string;
+  questions: QuizQuestion<any, any>[];
+}
+
 type MultipleChoice = QuizQuestion<string[], string>;
 type SelectAll = QuizQuestion<string[], string[]>;
 type TrueFalse = QuizQuestion<string[], string>;
@@ -15,7 +20,7 @@ type FillInBlank = QuizQuestion<string, string>;
 type Matching = QuizQuestion<{ [term: string]: string }, { [term: string]: string }>;
 
 const useGenerateQuiz = () => {
-  const [quizData, setQuizData] = useState<QuizQuestion<any, any>[]>([]);
+  const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,15 +53,17 @@ const useGenerateQuiz = () => {
 
       const data = await response.json();
 
-      if (!Array.isArray(data)) {
+      if (!data._id || !Array.isArray(data.questions)) {
         throw new Error('Invalid response format from server');
       }
 
+      // Store both quiz ID and questions
+      localStorage.setItem('quizData', JSON.stringify(data));
       setQuizData(data);
     } catch (err) {
       console.error('Error generating quiz:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate quiz. Please try again.');
-      setQuizData([]); // Clear any existing quiz data on error
+      setQuizData(null);
     } finally {
       setIsGenerating(false);
     }

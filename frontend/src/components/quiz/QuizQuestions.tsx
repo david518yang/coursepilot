@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { QuizQuestion } from './GenerateQuiz';
+import { QuizQuestion, QuizData } from './GenerateQuiz';
 import MultipleChoice from './question_formats/MultipleChoice';
 import SelectAll from './question_formats/SelectAll';
 import TrueFalse from './question_formats/TrueFalse';
@@ -14,7 +14,7 @@ type AnswerType = string | string[] | { terms: string[]; descriptions: string[] 
 type CorrectAnswerType = string | string[] | { [term: string]: string };
 
 const QuizQuestions = () => {
-  const [questions, setQuestions] = useState<QuizQuestion<any, any>[]>([]);
+  const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [userAnswers, setUserAnswers] = useState<Record<number, any>>({});
   const router = useRouter();
 
@@ -24,7 +24,16 @@ const QuizQuestions = () => {
       router.push('/quiz/generate');
       return;
     }
-    setQuestions(JSON.parse(storedQuizData));
+    try {
+      const parsedData = JSON.parse(storedQuizData);
+      if (!parsedData._id || !Array.isArray(parsedData.questions)) {
+        throw new Error('Invalid quiz data format');
+      }
+      setQuizData(parsedData);
+    } catch (error) {
+      console.error('Error parsing quiz data:', error);
+      router.push('/quiz/generate');
+    }
   }, []);
 
   const handleMultipleChoiceChange = (questionIndex: number, answer: string) => {
@@ -52,71 +61,81 @@ const QuizQuestions = () => {
     }));
   };
 
-  const handleMatchingChange = (questionIndex: number, answer: Record<string, string>) => {
-    setUserAnswers(prev => {
-      const currentAnswers = (prev[questionIndex] as Record<string, string>) || {};
-      const newAnswer = { ...currentAnswers, ...answer } as unknown as AnswerType;
-      return { ...prev, [questionIndex]: newAnswer };
-    });
+  const handleMatchingChange = (questionIndex: number, term: string, description: string) => {
+    setUserAnswers(prev => ({
+      ...prev,
+      [questionIndex]: {
+        ...((prev[questionIndex] as Record<string, string>) || {}),
+        [term]: description,
+      },
+    }));
   };
+
+  if (!quizData) {
+    return <div>Loading quiz...</div>;
+  }
 
   return (
     <div className='max-w-4xl mx-auto py-8 px-4'>
       <ul className='space-y-12'>
-        {questions.map((item, index) => {
+        {quizData.questions.map((question, index) => {
+          const userAnswer = userAnswers[index];
+
           return (
             <li key={index} className='bg-white rounded-lg shadow-lg border border-gray-200 p-6'>
-              {item.format !== 'fill in the blank' && (
+              {question.format !== 'fill in the blank' && (
                 <p className='text-lg font-semibold mb-4 text-gray-800'>
-                  {index + 1}. {item.question}
+                  {index + 1}. {question.question}
                 </p>
               )}
               <div>
-                {item.format === 'multiple choice' && (
+                {question.format === 'multiple choice' && (
                   <MultipleChoice
-                    answers={item.answers as string[]}
-                    selectedAnswer={userAnswers[index] as string | null}
+                    answers={question.answers as string[]}
+                    selectedAnswer={userAnswer as string | null}
                     onAnswerChange={answer => handleMultipleChoiceChange(index, answer)}
                     index={index}
                   />
                 )}
-                {item.format === 'select all' && (
+                {question.format === 'select all' && (
                   <SelectAll
-                    answers={item.answers as string[]}
-                    selectedAnswers={(userAnswers[index] as string[]) || []}
+                    answers={question.answers as string[]}
+                    selectedAnswers={(userAnswer as string[]) || []}
                     onMultiAnswerChange={(answer: string, isChecked: boolean) =>
                       handleSelectAllChange(index, answer, isChecked)
                     }
                     index={index}
                   />
                 )}
-                {item.format === 'true false' && (
+                {question.format === 'true false' && (
                   <TrueFalse
-                    selectedAnswer={userAnswers[index] as string | null}
+                    selectedAnswer={userAnswer as string | null}
                     onTFChange={(answer: string) => handleStringChange(index, answer)}
                     index={index}
                   />
                 )}
-                {item.format === 'short answer' && (
+                {question.format === 'short answer' && (
                   <ShortAnswer
-                    selectedAnswer={userAnswers[index] as string | null}
+                    selectedAnswer={userAnswer as string | null}
                     onAnswerChange={(answer: string) => handleStringChange(index, answer)}
                     index={index}
                   />
                 )}
-                {item.format === 'fill in the blank' && (
+                {question.format === 'fill in the blank' && (
                   <FillBlank
-                    question={item.question}
-                    selectedAnswer={userAnswers[index] as string | null}
+                    question={question.question}
+                    selectedAnswer={userAnswer as string | null}
                     onAnswerChange={(answer: string) => handleStringChange(index, answer)}
                     index={index}
                   />
                 )}
-                {item.format === 'matching' && (
+                {question.format === 'matching' && (
                   <Matching
-                    answers={item.answers as { terms: string[]; descriptions: string[] }}
-                    selectedAnswers={userAnswers[index] as Record<string, string> | null}
-                    onMatchingChange={(answers: Record<string, string>) => handleMatchingChange(index, answers)}
+                    answers={question.answers as { terms: string[]; descriptions: string[] }}
+                    selectedAnswers={userAnswer as Record<string, string> | null}
+                    onMatchingChange={(term: string, description: string) =>
+                      handleMatchingChange(index, term, description)
+                    }
                     index={index}
                   />
                 )}

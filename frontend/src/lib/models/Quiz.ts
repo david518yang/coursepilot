@@ -1,11 +1,18 @@
 import mongoose, { Document, Model } from 'mongoose';
 
-export type QuestionFormat = 'multiple choice' | 'select all' | 'true false' | 'short answer' | 'fill in the blank' | 'matching';
+export type QuestionFormat =
+  | 'multiple choice'
+  | 'select all'
+  | 'true false'
+  | 'short answer'
+  | 'fill in the blank'
+  | 'matching';
 
 export interface IQuizQuestion {
   question: string;
   answers?: string[] | string | { [term: string]: string };
-  correct_answers?: string[] | string | { [term: string]: string };
+  correctAnswer?: string[] | string | { [term: string]: string };
+  correctAnswers?: string[] | string | { [term: string]: string };
   format: QuestionFormat;
 }
 
@@ -30,41 +37,57 @@ export interface IQuizClean {
   updatedAt: string;
 }
 
-export interface IQuizDocument extends IQuiz, Document {
+export interface IQuizLean extends IQuiz {
+  _id: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const quizQuestionSchema = new mongoose.Schema<IQuizQuestion>({
-  question: {
-    type: String,
-    required: true,
+export interface IQuizDocument extends IQuiz, Document {
+  _id: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const quizQuestionSchema = new mongoose.Schema<IQuizQuestion>(
+  {
+    question: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    format: {
+      type: String,
+      required: true,
+      enum: ['multiple choice', 'select all', 'true false', 'short answer', 'fill in the blank', 'matching'],
+    },
+    answers: {
+      type: mongoose.Schema.Types.Mixed,
+      required: false,
+    },
+    correctAnswer: {
+      type: mongoose.Schema.Types.Mixed,
+      required: false,
+    },
+    correctAnswers: {
+      type: mongoose.Schema.Types.Mixed,
+      required: false,
+    },
   },
-  answers: {
-    type: mongoose.Schema.Types.Mixed,
-    required: false,
-  },
-  correct_answers: {
-    type: mongoose.Schema.Types.Mixed,
-    required: false,
-  },
-  format: {
-    type: String,
-    required: true,
-    enum: ['multiple choice', 'select all', 'true false', 'short answer', 'fill in the blank', 'matching'],
-  },
-});
+  { _id: false }
+);
 
 const quizSchema = new mongoose.Schema<IQuizDocument>(
   {
     title: {
       type: String,
       required: true,
+      trim: true,
     },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: 'Course',
+      required: true,
     },
     userId: {
       type: String,
@@ -73,18 +96,24 @@ const quizSchema = new mongoose.Schema<IQuizDocument>(
     subject: {
       type: String,
       required: true,
+      trim: true,
     },
     topic: {
       type: String,
       required: true,
+      trim: true,
     },
-    questions: [quizQuestionSchema],
+    questions: {
+      type: [quizQuestionSchema],
+      required: false,
+    },
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 
-const Quiz: Model<IQuizDocument> = mongoose.models.Quiz || mongoose.model('Quiz', quizSchema);
+const Quiz: Model<IQuizDocument> = mongoose.models?.Quizzes || mongoose.model('Quizzes', quizSchema);
 
 export default Quiz;

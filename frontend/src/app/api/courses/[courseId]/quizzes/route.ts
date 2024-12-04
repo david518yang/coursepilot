@@ -12,7 +12,18 @@ export async function POST(request: Request, { params }: { params: { courseId: s
 
     const { title, subject, topic, questions } = await request.json();
 
-    await connectToMongoDB();
+    // Validate required fields
+    if (!title || !subject || !topic || !questions) {
+      return new NextResponse('Missing required fields', { status: 400 });
+    }
+
+    // Ensure MongoDB connection is established
+    const connection = await connectToMongoDB();
+    if (!connection) {
+      console.error('Failed to connect to MongoDB');
+      return new NextResponse('Database connection error', { status: 500 });
+    }
+
     const quiz = await Quiz.create({
       title,
       courseId: params.courseId,
@@ -36,11 +47,17 @@ export async function GET(request: Request, { params }: { params: { courseId: st
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    await connectToMongoDB();
+    // Ensure MongoDB connection is established
+    const connection = await connectToMongoDB();
+    if (!connection) {
+      console.error('Failed to connect to MongoDB');
+      return new NextResponse('Database connection error', { status: 500 });
+    }
+
     const quizzes = await Quiz.find({
       courseId: params.courseId,
       userId: user.id,
-    });
+    }).sort({ updatedAt: 'desc' }); // Added sorting by updatedAt for consistency
 
     return NextResponse.json(quizzes);
   } catch (error) {

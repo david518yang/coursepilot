@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { currentUser } from '@clerk/nextjs/server';
-import Quiz from '@/lib/models/Quiz';
-import { connectToMongoDB } from '@/lib/db';
 import { shuffle } from 'lodash';
 
 const GEN_AI = new GoogleGenerativeAI(process.env.GEMINI_KEY as string);
@@ -49,12 +47,27 @@ const SCHEMA = {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[Debug] Starting quiz generation');
+    console.log('[Debug] Auth headers:', {
+      auth: req.headers.get('authorization'),
+      cookie: req.headers.get('cookie'),
+    });
+
     const user = await currentUser();
     if (!user) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      console.error('[Error] Unauthorized: No user found');
+      return NextResponse.json({ error: 'Unauthorized: No user found' }, { status: 401 });
     }
 
-    const { subject, topic, numQuestions, formats, courseId } = await req.json();
+    console.log('[Debug] Authenticated user:', user.id);
+
+    const { subject, topic, numQuestions, formats } = await req.json();
+    console.log('[Debug] Received request:', { subject, topic, numQuestions, formats });
+
+    if (!subject || !topic || !numQuestions || !formats || !Array.isArray(formats)) {
+      console.error('[Error] Invalid request parameters:', { subject, topic, numQuestions, formats });
+      return NextResponse.json({ error: 'Missing or invalid required parameters' }, { status: 400 });
+    }
 
     const distributeQuestions = async (
       numQuestions: number,
@@ -138,6 +151,7 @@ export async function POST(req: NextRequest) {
     };
 
     const questionDistribution = await distributeQuestions(numQuestions, formats, subject, topic);
+    console.log('[Debug] Question distribution:', questionDistribution);
 
     const formatSpecificPrompts = {
       'multiple choice': `Generate exactly ${questionDistribution['multiple choice'].numQuestions} multiple choice question(s) about ${questionDistribution['multiple choice'].topics.join(', ')} in ${subject}. For each question:
@@ -146,42 +160,57 @@ export async function POST(req: NextRequest) {
 - Include only one correct answer
 - Make incorrect choices plausible but clearly wrong
 - Avoid "all/none of the above"
-Format as JSON: {"question": "What is X?", "answers": ["answer1", "answer2", "answer3", "answer4"], "correct_answer": "answer1", "format": "multiple choice"}. Return ONLY the JSON array.`,
+Format as JSON: {"question": "What is X?", "answers": ["answer1", "answer2", "answer3", "answer4"], "correctAnswer": "answer1", "format": "multiple choice"}. Return ONLY the JSON array.`,
 
       'true false': `Generate exactly ${questionDistribution['true false'].numQuestions} true/false question(s) about ${questionDistribution['true false'].topics.join(', ')} in ${subject}. For each question:
 - Make statements clear and unambiguous 
 - Avoid double negatives
 - Focus on important concepts
 - Mix true and false statements evenly
-Format as JSON: {"question": "Statement", "correct_answer": "True", "format": "true false"}. Return ONLY the JSON array.`,
+Format as JSON: {"question": "Statement", "correctAnswer": "True", "format": "true false"}. Return ONLY the JSON array.`,
 
       'short answer': `Generate exactly ${questionDistribution['short answer'].numQuestions} short answer question(s) about ${questionDistribution['short answer'].topics.join(', ')} in ${subject}. For each question:
 - question(s) should have a single specific answer
 - Answer should be 1-3 words maximum
 - Focus on key terms, names, or concepts
 - Avoid question(s) with multiple possible answers
-Format as JSON: {"question": "What is X?", "format": "short answer"}. Return ONLY the JSON array.`,
+Format as JSON: {"question": "What is X?", "correctAnswer": "answer", "format": "short answer"}. Return ONLY the JSON array.`,
 
       'fill in the blank': `Generate exactly ${questionDistribution['fill in the blank'].numQuestions} fill-in-the-blank question(s) about ${questionDistribution['fill in the blank'].topics.join(', ')} in ${subject}. For each question:
-- Use ONE underscore _ to indicate the blank
+- Use ONLY ONE underscore _ to indicate the blank
 - Keep sentences under 15 words
-- Blank should test a key concept
+- There should only be one blank and it should test a key concept
 - Answer should be 1-2 words maximum
-Format as JSON: {"question": "The _ is important.", "format": "fill in the blank"}. Return ONLY the JSON array.`,
+Format as JSON: {"question": "The _ is important.", "correctAnswer": "answer", "format": "fill in the blank"}. Return ONLY the JSON array.`,
 
-      matching: `Generate exactly ${questionDistribution['matching'].numQuestions} matching sets about ${questionDistribution['matching'].topics.join(', ')} in ${subject}. For each set:
+      matching: `Generate exactly ${questionDistribution['matching'].numQuestions} matching question about ${questionDistribution['matching'].topics.join(', ')} in ${subject}. Format your response as a JSON array with this exact structure:
+[{
+  "question": "Match the Renaissance artists to their most famous works",
+  "format": "matching",
+  "answers": {
+    "terms": ["Artist1", "Artist2", "Artist3"],
+    "descriptions": ["Work1", "Work2", "Work3"]
+  },
+  "correctAnswers": {
+    "Artist1": "Work1",
+    "Artist2": "Work2",
+    "Artist3": "Work3"
+  }
+}]
+
+Rules:
 - Create 3-5 pairs of related terms and descriptions
-- Terms should be concise (1-3 words), and be specific to the topic
-- Descriptions should be clear and specific to which term they should be matched to
+- Terms should be concise (1-3 words)
+- Descriptions should be clear and specific
 - All items should be related to the same concept
-Format as JSON: {"question": "Match terms to descriptions", "answers": {"terms": ["Term1", "Term2"], "descriptions": ["Desc1", "Desc2"]}, "correct_answers": {"Term1": "Desc1", "Term2": "Desc2"}, "format": "matching"}. Return ONLY the JSON array.`,
+- Return ONLY the JSON array with no additional text`,
 
       'select all': `Generate exactly ${questionDistribution['select all'].numQuestions} select-all question(s) about ${questionDistribution['select all'].topics.join(', ')} in ${subject}. For each question:
 - Provide 4-6 total options
 - Include 2-4 correct answers
 - Make all options related and plausible
 - Avoid obvious incorrect answers
-Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "answer2", "answer3", "answer4"], "correct_answers": ["answer1", "answer3"], "format": "select all"}. Return ONLY the JSON array.`,
+Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "answer2", "answer3", "answer4"], "correctAnswers": ["answer1", "answer3"], "format": "select all"}. Return ONLY the JSON array.`,
     };
 
     for (const format in formatSpecificPrompts) {
@@ -189,21 +218,56 @@ Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "an
         'You are an expert test creator. ' + formatSpecificPrompts[format as keyof typeof formatSpecificPrompts];
     }
 
-    const selectedFormatPrompts = formats
-      .filter((format: string) => questionDistribution[format].numQuestions > 0)
-      .map((format: string) => formatSpecificPrompts[format as keyof typeof formatSpecificPrompts]);
-
     try {
       const responses = await Promise.all(
-        selectedFormatPrompts.map(async (prompt: string) => {
-          try {
-            const completion = await MODEL.generateContent(prompt);
-            const responseText = completion.response.text();
+        formats.map(async (format: string) => {
+          if (questionDistribution[format].numQuestions === 0) return [];
 
-            let cleanedResponse = responseText.replace(/```json\n?|```/g, '').trim();
+          try {
+            const prompt = formatSpecificPrompts[format as keyof typeof formatSpecificPrompts];
+            console.log(`\n[Generation] Generating ${questionDistribution[format].numQuestions} ${format} questions`);
+            console.log(`[Generation] Topics:`, questionDistribution[format].topics);
+
+            const completion = await MODEL.generateContent(prompt);
+            if (!completion.response) {
+              throw new Error('No response from AI model');
+            }
+
+            const responseText = completion.response.text();
+            console.log(`[Debug] Raw AI response length for ${format}:`, responseText.length);
+
+            let cleanedResponse = responseText
+              .replace(/```json\n?|```/g, '') // Remove code blocks
+              .replace(/^\s*\n/gm, '') // Remove empty lines
+              .replace(/\/\/.*/g, '') // Remove any comments
+              .trim();
+
+            console.log(`[Debug] Cleaned response length for ${format}:`, cleanedResponse.length);
+
+            // For matching format, add extra JSON validation
+            if (format === 'matching') {
+              try {
+                // Try to parse as is first
+                JSON.parse(cleanedResponse);
+              } catch (e) {
+                // If parsing fails, try to extract just the JSON array
+                const jsonStart = cleanedResponse.indexOf('[');
+                const jsonEnd = cleanedResponse.lastIndexOf(']') + 1;
+                if (jsonStart !== -1 && jsonEnd > jsonStart) {
+                  cleanedResponse = cleanedResponse.slice(jsonStart, jsonEnd);
+                  // Verify it's now valid JSON
+                  JSON.parse(cleanedResponse);
+                }
+              }
+            }
 
             if (!cleanedResponse.startsWith('[')) {
-              cleanedResponse = '[' + cleanedResponse;
+              const jsonStart = cleanedResponse.indexOf('[');
+              if (jsonStart !== -1) {
+                cleanedResponse = cleanedResponse.slice(jsonStart);
+              } else {
+                cleanedResponse = '[' + cleanedResponse;
+              }
             }
             if (!cleanedResponse.endsWith(']')) {
               cleanedResponse = cleanedResponse + ']';
@@ -213,92 +277,93 @@ Format as JSON: {"question": "Select all that apply", "answers": ["answer1", "an
             try {
               parsedResponse = JSON.parse(cleanedResponse);
             } catch (parseError) {
-              console.error('JSON parsing error:', parseError);
-              console.error('Cleaned response that failed to parse:', cleanedResponse);
-              throw new Error(`Failed to parse AI response for format`);
+              console.error(`[Error] JSON parsing failed for ${format}:`, {
+                error: parseError,
+                cleanedResponse: cleanedResponse.substring(0, 200) + '...',
+              });
+              throw new Error(`Failed to parse AI response for ${format}`);
             }
 
             const questions = Array.isArray(parsedResponse) ? parsedResponse : [parsedResponse];
+            console.log(`[Debug] Generated ${questions.length} ${format} questions`);
 
-            // format validation
-            questions.forEach((question, idx) => {
-              if (!question.format || !question.question) {
-                throw new Error(`Invalid question format at index ${idx}`);
+            // Basic format validation
+            questions.forEach((q, idx) => {
+              q.format = format; // Ensure format is set correctly
+
+              // Check required fields based on format
+              if (!q.question) {
+                throw new Error(`Question ${idx + 1} missing question text`);
+              }
+
+              if (format === 'multiple choice') {
+                if (!Array.isArray(q.answers) || q.answers.length !== 4) {
+                  throw new Error(`Question ${idx + 1} must have exactly 4 answers`);
+                }
+                if (!q.correctAnswer) {
+                  throw new Error(`Question ${idx + 1} missing correctAnswer`);
+                }
+              } else if (format === 'select all') {
+                if (!Array.isArray(q.answers)) {
+                  throw new Error(`Question ${idx + 1} missing answers array`);
+                }
+                if (!Array.isArray(q.correctAnswers)) {
+                  throw new Error(`Question ${idx + 1} missing correctAnswers array`);
+                }
+              } else if (format === 'matching') {
+                if (!q.answers?.terms || !q.answers?.descriptions) {
+                  throw new Error(`Question ${idx + 1} missing terms or descriptions`);
+                }
+                if (!q.correctAnswers) {
+                  throw new Error(`Question ${idx + 1} missing correctAnswers mapping`);
+                }
+              } else if (format === 'fill in the blank') {
+                if (!q.question.includes('_')) {
+                  throw new Error(`Question ${idx + 1} missing blank (_)`);
+                }
+                if (!q.correctAnswer) {
+                  throw new Error(`Question ${idx + 1} missing correctAnswer`);
+                }
               }
             });
 
-            const format = Object.keys(questionDistribution).find(f =>
-              prompt.includes(f)
-            ) as keyof typeof questionDistribution;
-
-            if (questions.length !== questionDistribution[format].numQuestions) {
-              console.warn(
-                `Expected ${questionDistribution[format].numQuestions} question(s) for ${format}, but got ${questions.length}`
-              );
-            }
-
             return questions;
           } catch (promptError) {
-            console.error('Error processing prompt:', promptError);
-            throw promptError;
+            console.error(`[Error] Failed to generate ${format} questions:`, promptError);
+            return []; // Skip failed format but continue with others
           }
         })
       );
 
       const quizData = shuffle(responses.flat());
+      console.log('\n[Final] Questions generated by format:');
+      const distribution = quizData.reduce(
+        (acc, q) => {
+          acc[q.format] = (acc[q.format] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+      console.log(distribution);
 
-      // final quiz data validation
-      if (quizData.length !== numQuestions) {
-        throw new Error(`Expected ${numQuestions} questions, but received ${quizData.length}`);
+      if (quizData.length === 0) {
+        throw new Error('Failed to generate any valid questions');
       }
 
-      // Save to MongoDB if courseId is provided
-      try {
-        await connectToMongoDB();
-
-        const dummyCourseId = '65f4f8d71f0944b332f12345'; // Dummy MongoDB ObjectId
-        const dummyUserId = 'user_2Zs93kL9mN0pQ1rT'; // Dummy Clerk userId
-
-        const quiz = await Quiz.create({
-          title: `${topic} Quiz`,
-          courseId: courseId || dummyCourseId,
-          userId: user?.id || dummyUserId,
-          subject,
-          topic,
-          questions: quizData,
-        });
-
-        console.log('Quiz saved successfully:', quiz);
-        return NextResponse.json({
-          _id: quiz._id.toString(),
-          questions: quizData
-        });
-      } catch (dbError) {
-        console.error('MongoDB Error:', dbError);
-        throw new Error('Failed to save quiz to database');
-      }
-
-      return NextResponse.json({
-        _id: new mongoose.Types.ObjectId().toString(),
-        questions: quizData.map(q => ({
-          ...q,
-          answers: Array.isArray(q.answers) ? q.answers : q.answers || undefined,
-          correct_answers: Array.isArray(q.correct_answers) ? q.correct_answers : q.correct_answers || undefined,
-        }))
-      });
+      return NextResponse.json({ questions: quizData });
     } catch (error) {
       console.error('Error generating quiz:', error);
-      return NextResponse.json(
-        {
-          success: false,
-          error: error instanceof Error ? error.message : 'Failed to generate quiz',
-          details: process.env.NODE_ENV === 'development' ? error : undefined,
-        },
-        { status: 500 }
-      );
+      throw error;
     }
   } catch (error) {
-    console.error('[QUIZ_GENERATION]', error);
-    return new NextResponse('Internal Error', { status: 500 });
+    console.error('Error in quiz generation:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to generate quiz',
+        details: process.env.NODE_ENV === 'development' ? error : undefined,
+      },
+      { status: 500 }
+    );
   }
 }

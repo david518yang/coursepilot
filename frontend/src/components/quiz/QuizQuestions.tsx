@@ -13,28 +13,24 @@ import Matching from './question_formats/Matching';
 type AnswerType = string | string[] | { terms: string[]; descriptions: string[] };
 type CorrectAnswerType = string | string[] | { [term: string]: string };
 
-const QuizQuestions = () => {
-  const [quizData, setQuizData] = useState<QuizData | null>(null);
+interface QuizQuestionsProps {
+  quizData: {
+    _id: string;
+    courseId: string;
+    title: string;
+    questions: {
+      question: string;
+      format: string;
+      answers: any;
+      correctAnswer: any;
+    }[];
+  };
+  courseId: string;
+}
+
+export function QuizQuestions({ quizData, courseId }: QuizQuestionsProps) {
   const [userAnswers, setUserAnswers] = useState<Record<number, any>>({});
   const router = useRouter();
-
-  useEffect(() => {
-    const storedQuizData = localStorage.getItem('quizData');
-    if (!storedQuizData) {
-      router.push('/quiz/generate');
-      return;
-    }
-    try {
-      const parsedData = JSON.parse(storedQuizData);
-      if (!parsedData._id || !Array.isArray(parsedData.questions)) {
-        throw new Error('Invalid quiz data format');
-      }
-      setQuizData(parsedData);
-    } catch (error) {
-      console.error('Error parsing quiz data:', error);
-      router.push('/quiz/generate');
-    }
-  }, []);
 
   const handleMultipleChoiceChange = (questionIndex: number, answer: string) => {
     setUserAnswers(prev => ({
@@ -70,10 +66,6 @@ const QuizQuestions = () => {
       },
     }));
   };
-
-  if (!quizData) {
-    return <div>Loading quiz...</div>;
-  }
 
   return (
     <div className='max-w-4xl mx-auto py-8 px-4'>
@@ -148,10 +140,47 @@ const QuizQuestions = () => {
         <button
           type='submit'
           className='bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium shadow-md transition-colors'
-          onClick={e => {
+          onClick={async e => {
             e.preventDefault();
-            localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
-            router.push('/quiz/results');
+            try {
+              // Send answers to validation API
+              const response = await fetch('/api/ai/quiz/validation', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  userAnswers,
+                  quizData: quizData.questions,
+                }),
+              });
+
+              if (!response.ok) {
+                throw new Error('Failed to validate quiz');
+              }
+
+              const results = await response.json();
+
+              // Store quiz data and user answers separately
+              localStorage.setItem('quizData', JSON.stringify({
+                _id: quizData._id,
+                courseId: courseId,
+                questions: quizData.questions.map((q: any, index: number) => ({
+                  question: q.question,
+                  format: q.format,
+                  correctAnswer: q.correctAnswer,
+                  correctAnswers: q.correctAnswers,
+                  answers: q.answers,
+                  userAnswer: userAnswers[index]
+                }))
+              }));
+
+              // Redirect to results page with correct URL format
+              router.push(`/courses/${courseId}/quizzes/${quizData._id}/results`);
+            } catch (error) {
+              console.error('Failed to submit quiz:', error);
+              alert('Failed to submit quiz. Please try again.');
+            }
           }}
         >
           Submit Quiz
@@ -159,6 +188,4 @@ const QuizQuestions = () => {
       </div>
     </div>
   );
-};
-
-export default QuizQuestions;
+}

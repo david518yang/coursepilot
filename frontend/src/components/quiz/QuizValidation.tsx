@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { QuizQuestion } from './GenerateQuiz';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface ValidationResult {
   score: number;
@@ -22,207 +21,151 @@ const QuizValidation = () => {
   const [results, setResults] = useState<ValidationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const validateQuiz = async () => {
+    const loadResults = () => {
       try {
-        const storedQuizData = localStorage.getItem('quizData');
-        const storedUserAnswers = localStorage.getItem('userAnswers');
-
-        if (!storedQuizData || !storedUserAnswers) {
-          router.push('/quiz/generate');
+        const storedResults = localStorage.getItem('quizResults');
+        if (!storedResults) {
+          const quizId = searchParams.get('quizId');
+          const courseId = searchParams.get('courseId');
+          if (quizId && courseId) {
+            router.push(`/courses/${courseId}/quizzes/${quizId}/questions`);
+          } else {
+            router.push('/courses');
+          }
           return;
         }
 
-        const quizData = JSON.parse(storedQuizData);
-        const userAnswers = JSON.parse(storedUserAnswers);
-
-        const response = await fetch('/api/quiz/validation', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userAnswers,
-            quizData,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to validate quiz');
-        }
-
-        const validationResults = await response.json();
-        console.log('validationResults: ', validationResults);
-        setResults(validationResults);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        const parsedResults = JSON.parse(storedResults);
+        setResults(parsedResults);
+      } catch (error) {
+        console.error('Failed to load quiz results:', error);
+        setError('Failed to load quiz results. Please try again.');
       }
     };
 
-    validateQuiz();
-  }, []);
+    loadResults();
+  }, [router, searchParams]);
 
   if (error) {
     return (
-      <div className='container mx-auto p-4'>
-        <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded'>
-          <p>Error: {error}</p>
-        </div>
+      <div className='flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4'>
+        <div className='text-red-500 text-xl font-semibold mb-4'>{error}</div>
+        <button
+          onClick={() => router.back()}
+          className='bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium'
+        >
+          Go Back
+        </button>
       </div>
     );
   }
 
   if (!results) {
     return (
-      <div className='container mx-auto p-4'>
-        <p>Loading results...</p>
+      <div className='flex justify-center items-center min-h-screen bg-gray-50'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500'></div>
       </div>
     );
   }
 
+  const percentage = Math.round((results.correctAnswers / results.totalQuestions) * 100);
+
   return (
-    <div className='container mx-auto p-4'>
-      <div className='bg-white rounded-lg shadow-lg p-6'>
-        <h1 className='text-2xl font-bold mb-4'>Quiz Results</h1>
-        <div className='mb-6'>
-          <p className='text-lg'>Score: {results.score.toFixed(1)}%</p>
-          <p className='text-lg'>
-            Correct Answers: {results.correctAnswers} out of {results.totalQuestions}
-          </p>
+    <div className='max-w-4xl mx-auto py-8 px-4'>
+      <div className='bg-white rounded-lg shadow-lg p-6 mb-8'>
+        <h1 className='text-2xl font-bold text-gray-800 mb-4'>Quiz Results</h1>
+        <div className='flex items-center justify-between mb-6'>
+          <div>
+            <p className='text-lg'>
+              Score:{' '}
+              <span className='font-semibold'>
+                {results.correctAnswers}/{results.totalQuestions}
+              </span>
+            </p>
+            <p className='text-lg'>
+              Percentage: <span className='font-semibold'>{percentage}%</span>
+            </p>
+          </div>
+          <div className={`text-2xl font-bold ${percentage >= 70 ? 'text-green-500' : 'text-red-500'}`}>
+            {percentage >= 70 ? 'PASSED' : 'FAILED'}
+          </div>
         </div>
+      </div>
 
-        <div className='space-y-6'>
-          {results.detailedResults.map(result => (
-            <div
-              key={result.questionNumber}
-              className={`p-4 rounded-lg ${
-                result.isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-              }`}
-            >
-              <div className='flex justify-between items-start'>
-                <p className='font-semibold'>Question {result.questionNumber}</p>
-                <span
-                  className={`px-2 py-1 rounded text-sm ${
-                    result.isCorrect ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
-                  }`}
-                >
-                  {result.isCorrect ? 'Correct' : 'Incorrect'}
-                </span>
-              </div>
-
-              <p className='mt-2 text-gray-700'>{result.question}</p>
-
-              {!result.isCorrect && (
-                <div className='mt-4 bg-red-100 p-3 rounded'>
-                  {result.format === 'matching' && (
-                    <div className='grid grid-cols-2 gap-6'>
-                      <div className='bg-white p-4 rounded-lg shadow-sm border border-gray-200'>
-                        <h4 className='text-sm font-semibold text-gray-600 mb-3'>Your Matches</h4>
-                        <div className='space-y-2'>
-                          {Object.entries(result.userAnswer || {}).map(([term, desc]) => (
-                            <div key={term} className='grid grid-cols-[120px_auto_1fr] gap-2 p-2 bg-gray-50 rounded'>
-                              <div className='font-medium text-gray-700 text-right'>{term}</div>
-                              <div className='text-gray-500 justify-self-center'>→</div>
-                              <div className='text-gray-900'>{String(desc)}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className='bg-white p-4 rounded-lg shadow-sm border border-gray-200'>
-                        <h4 className='text-sm font-semibold text-gray-600 mb-3 flex items-center'>
-                          <svg className='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
-                          </svg>
-                          Correct Matches
-                        </h4>
-                        <div className='space-y-2'>
-                          {Object.entries(result.correctAnswer).map(([term, desc]) => (
-                            <div key={term} className='grid grid-cols-[120px_auto_1fr] gap-2 p-2 bg-gray-50 rounded'>
-                              <div className='font-medium text-gray-700 text-right'>{term}</div>
-                              <div className='text-gray-500 justify-self-center'>→</div>
-                              <div className='text-gray-900'>{String(desc)}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {result.format === 'select all' && (
-                    <>
-                      <div className='mt-2'>
-                        <p className='text-sm text-gray-600'>Your selections:</p>
-                        <ul className='list-disc list-inside font-medium'>
-                          {(result.userAnswer || []).map((answer: string) => (
-                            <li key={answer}>{answer}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className='mt-2'>
-                        <p className='text-sm text-gray-600'>Correct selections:</p>
-                        <ul className='list-disc list-inside font-medium'>
-                          {result.correctAnswer.map((answer: string) => (
-                            <li key={answer}>{answer}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </>
-                  )}
-
-                  {(result.format === 'multiple choice' ||
-                    result.format === 'true false' ||
-                    result.format === 'short answer' ||
-                    result.format === 'fill in the blank') && (
-                    <>
-                      <div className='mt-2'>
-                        <p className='text-sm text-gray-600'>Your answer:</p>
-                        <p className='font-medium'>{result.userAnswer || 'No answer provided'}</p>
-                      </div>
-                      <div className='mt-2'>
-                        <p className='text-sm text-gray-600'>Correct answer:</p>
-                        <p className='font-medium'>{result.correctAnswer}</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {result.isCorrect && (
-                <div className='mt-2'>
-                  <p className='text-sm text-gray-600'>Your correct answer:</p>
-                  {result.format === 'matching' ? (
-                    <div className='space-y-2'>
-                      {Object.entries(result.userAnswer).map(([term, desc]) => (
-                        <div key={term} className='grid grid-cols-[120px_auto_1fr] gap-2 p-2 bg-gray-50 rounded'>
-                          <div className='font-medium text-gray-700 text-right'>{term}</div>
-                          <div className='text-gray-500 justify-self-center'>→</div>
-                          <div className='text-gray-900'>{String(desc)}</div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className='font-medium'>
-                      {typeof result.userAnswer === 'object'
-                        ? JSON.stringify(result.userAnswer, null, 2)
-                        : result.userAnswer}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className='mt-8 flex justify-center'>
-          <button
-            onClick={() => router.push('/editor')}
-            className='bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg'
+      <div className='space-y-6'>
+        {results.detailedResults.map((result, index) => (
+          <div
+            key={index}
+            className={`bg-white rounded-lg shadow p-6 border-l-4 ${
+              result.isCorrect ? 'border-green-500' : 'border-red-500'
+            }`}
           >
-            Return to Dashboard
-          </button>
-        </div>
+            <div className='flex items-start justify-between'>
+              <div className='flex-1'>
+                <h3 className='text-lg font-semibold mb-2'>
+                  Question {result.questionNumber}: {result.question}
+                </h3>
+                <div className='space-y-2'>
+                  <p>
+                    <span className='font-medium'>Your Answer:</span>{' '}
+                    {Array.isArray(result.userAnswer)
+                      ? result.userAnswer.join(', ')
+                      : typeof result.userAnswer === 'object'
+                        ? Object.entries(result.userAnswer)
+                            .map(([key, value]) => `${key}: ${value}`)
+                            .join(', ')
+                        : result.userAnswer || 'No answer provided'}
+                  </p>
+                  <p>
+                    <span className='font-medium'>Correct Answer:</span>{' '}
+                    {Array.isArray(result.correctAnswer)
+                      ? result.correctAnswer.join(', ')
+                      : typeof result.correctAnswer === 'object'
+                        ? Object.entries(result.correctAnswer)
+                            .map(([key, value]) => `${key}: ${value}`)
+                            .join(', ')
+                        : result.correctAnswer}
+                  </p>
+                </div>
+              </div>
+              <div className={`ml-4 ${result.isCorrect ? 'text-green-500' : 'text-red-500'} font-semibold text-lg`}>
+                {result.isCorrect ? '✓' : '✗'}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className='flex justify-center mt-8 space-x-4'>
+        <button
+          onClick={() => {
+            const courseId = searchParams.get('courseId');
+            if (courseId) {
+              router.push(`/courses/${courseId}`);
+            } else {
+              router.push('/courses');
+            }
+          }}
+          className='bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium'
+        >
+          Back to Course
+        </button>
+        <button
+          onClick={() => {
+            localStorage.removeItem('quizResults');
+            const quizId = searchParams.get('quizId');
+            const courseId = searchParams.get('courseId');
+            if (quizId && courseId) {
+              router.push(`/courses/${courseId}/quizzes/${quizId}/questions`);
+            }
+          }}
+          className='bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium'
+        >
+          Retake Quiz
+        </button>
       </div>
     </div>
   );

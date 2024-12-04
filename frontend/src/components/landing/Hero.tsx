@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 const Hero = () => {
   return (
-    <div className='relative w-4/5 text-center flex flex-col items-center gap-8 px-16 py-24'>
+    <div className='relative w-full text-center flex flex-col items-center gap-8 px-16 py-24'>
       <div className='absolute inset-0 bg-grid-pattern bg-radial-gradient'>
         <div className='absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_10%,black)]'></div>
       </div>

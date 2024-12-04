@@ -11,12 +11,22 @@ import { SidebarGroupAction } from '../ui/sidebar';
 import { BookOpenCheck, FileText, Library } from 'lucide-react';
 import NoteDialog from '../NoteDialog';
 import FlashcardDialog from '../FlashcardDialog';
+import { useParams, useRouter } from 'next/navigation';
 import UploadButton from '../UploadDialog';
 
 const CreateButton = () => {
   const [isDropdownMenuOpen, setIsDropdownMenuOpen] = useState(false);
+  const router = useRouter();
+  const params = useParams();
+
   const handleDropdownSelect = (e: Event) => {
     e.preventDefault();
+  };
+
+  const handleQuizCreate = (e: Event) => {
+    e.preventDefault();
+    setIsDropdownMenuOpen(false);
+    router.push(`/courses/${params.courseId}/quizzes/generate`);
   };
 
   return (
@@ -52,6 +62,12 @@ const CreateButton = () => {
           />
         </DropdownMenuGroup>
         <DropdownMenuGroup>
+          <DropdownMenuItem className='gap-2' onSelect={handleQuizCreate}>
+            <BookOpenCheck />
+            <span>Create quiz</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuGroup>
           <UploadButton
             trigger={
               <DropdownMenuItem className='gap-2' onSelect={handleDropdownSelect}>
@@ -82,12 +98,6 @@ const CreateButton = () => {
             }
             onClose={() => setIsDropdownMenuOpen(false)}
           />
-        </DropdownMenuGroup>
-        <DropdownMenuGroup>
-          <DropdownMenuItem className='gap-2' disabled>
-            <BookOpenCheck />
-            <span>Create quiz</span>
-          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

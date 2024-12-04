@@ -2,27 +2,68 @@
 import mongoose, { Connection } from 'mongoose';
 
 // Declaring a variable to store the cached database connection
+let isConnecting = false;
 let cachedConnection: Connection | null = null;
 
 // Function to establish a connection to MongoDB
 export async function connectToMongoDB() {
-  // If a cached connection exists, return it
-  if (cachedConnection) {
-    console.log('Using cached db connection');
+  // If we have a cached connection and it's ready, use it
+  if (cachedConnection?.readyState === 1) {
     return cachedConnection;
   }
+
+  // If already connecting, wait for it
+  if (isConnecting) {
+    console.log('Connection in progress, waiting...');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (cachedConnection?.readyState === 1) {
+      return cachedConnection;
+    }
+  }
+
   try {
-    // If no cached connection exists, establish a new connection to MongoDB
-    const cnx = await mongoose.connect(process.env.MONGODB_URI! + '/Courses');
-    // Cache the connection for future use
-    cachedConnection = cnx.connection;
-    // Log message indicating a new MongoDB connection is established
-    console.log('New mongodb connection established');
-    // Return the newly established connection
+    if (!process.env.MONGODB_URI) {
+      throw new Error('Please define the MONGODB_URI environment variable');
+    }
+
+    isConnecting = true;
+    console.log('Establishing new MongoDB connection...');
+
+    const options = {
+      bufferCommands: true,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      family: 4,
+      maxPoolSize: 10,
+      connectTimeoutMS: 10000,
+    };
+
+    // Establish new connection
+    await mongoose.connect(process.env.MONGODB_URI + '/Courses', options);
+    cachedConnection = mongoose.connection;
+
+    // Set up event handlers
+    mongoose.connection.on('connected', () => {
+      console.log('MongoDB connected successfully');
+    });
+
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+      cachedConnection = null;
+      isConnecting = false;
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected');
+      cachedConnection = null;
+      isConnecting = false;
+    });
+
+    isConnecting = false;
     return cachedConnection;
   } catch (error) {
-    // If an error occurs during connection, log the error and throw it
-    console.log(error);
+    console.error('MongoDB connection error:', error);
+    isConnecting = false;
     throw error;
   }
 }

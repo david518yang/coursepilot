@@ -1,4 +1,7 @@
+<div style="display: flex; flex-direction: column;">
+<img src="frontend/public/favicon.svg" height="64"/>
 <h1 align="center">coursepilot</h1>
+</div>
 
 > accelerate your note taking
 
@@ -26,7 +29,7 @@ Production: [coursepilot](https://coursepilot-0373030cb9f8.herokuapp.com/)
 
 #### Requirements
 
-- [Node.js]()
+- [Node.js](https://nodejs.org/en)
 - [pnpm](https://pnpm.io/installation)
 
 after cloning the repo, navigate into `/frontend` and run

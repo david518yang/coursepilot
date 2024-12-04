@@ -91,11 +91,9 @@ const Autocomplete = Extension.create({
   onUpdate() {
     // Generate autocomplete suggestion when the user finishes typing
     clearTimeout(this.storage.autocompleteDebouncer);
-    if (this.storage.autocompleteSuggestion) {
-      this.storage.autocompleteSuggestion = '';
-      this.storage.autocompletePosition = null;
-      this.editor.view.dispatch(this.editor.view.state.tr);
-    }
+    this.storage.autocompleteSuggestion = '';
+    this.storage.autocompletePosition = null;
+    this.editor.view.dispatch(this.editor.view.state.tr);
     this.storage.autocompleteDebouncer = setTimeout(async () => {
       const { state, view } = this.editor;
       const { from } = state.selection;
@@ -116,21 +114,17 @@ const Autocomplete = Extension.create({
   onSelectionUpdate() {
     // Clear autocomplete suggestion when the anchor is moved
     clearTimeout(this.storage.autocompleteDebouncer);
-    if (this.storage.autocompleteSuggestion) {
-      this.storage.autocompleteSuggestion = '';
-      this.storage.autocompletePosition = null;
-      this.editor.view.dispatch(this.editor.view.state.tr);
-    }
+    this.storage.autocompleteSuggestion = '';
+    this.storage.autocompletePosition = null;
+    this.editor.view.dispatch(this.editor.view.state.tr);
   },
 
   onDestroy() {
     // Clear autocomplete suggestion when switching to another note
     clearTimeout(this.storage.autocompleteDebouncer);
-    if (this.storage.autocompleteSuggestion) {
-      this.storage.autocompleteSuggestion = '';
-      this.storage.autocompletePosition = null;
-      this.editor.view.dispatch(this.editor.view.state.tr);
-    }
+    this.storage.autocompleteSuggestion = '';
+    this.storage.autocompletePosition = null;
+    this.editor.view.dispatch(this.editor.view.state.tr);
   },
 });
 

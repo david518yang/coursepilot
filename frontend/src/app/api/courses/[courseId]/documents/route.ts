@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Note from '@/lib/models/Note';
 import FlashcardSet, { IFlashcardSetDocument } from '@/lib/models/Flashcard';
+import PDF, { IPDFDocument } from '@/lib/models/PDF';
 import { currentUser } from '@clerk/nextjs/server';
 import { INoteDocument } from '@/lib/models/Note';
 
@@ -13,15 +14,20 @@ export async function GET(request: Request, { params }: { params: { courseId: st
     return await FlashcardSet.find({ courseId, userId }).select('_id title updatedAt').lean();
   };
 
+  const getPDFsFromCourse = async (courseId: string, userId: string): Promise<IPDFDocument[]> => {
+    return await PDF.find({ courseId, userId }).select('_id filename updatedAt').lean();
+  };
+
   const user = await currentUser();
 
   if (!user || !user.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const [notes, flashCardSets] = await Promise.all([
+  const [notes, flashCardSets, pdfs] = await Promise.all([
     getNotesFromCourse(params.courseId, user.id),
     getFlashcardSetsFromCourse(params.courseId, user.id),
+    getPDFsFromCourse(params.courseId, user.id),
   ]);
 
   const getItemUrl = (courseId: string, type: string, id: string) => {
@@ -35,6 +41,12 @@ export async function GET(request: Request, { params }: { params: { courseId: st
       ...flashcardSet,
       type: 'flashcard',
       url: getItemUrl(params.courseId, 'flashcard', flashcardSet._id),
+    })),
+    ...pdfs.map(pdf => ({
+      ...pdf,
+      type: 'pdf',
+      title: pdf.filename,
+      url: getItemUrl(params.courseId, 'pdf', pdf._id),
     })),
   ];
 

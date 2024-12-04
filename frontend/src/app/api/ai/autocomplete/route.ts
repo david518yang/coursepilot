@@ -8,6 +8,9 @@ const PROMPT = `Complete the following sentence, and return only the text missin
   Do not attempt to do any other formatting.
   If the content seems already complete, return the empty string.
   Otherwise, make an attempt.
+
+  For example, if the prompt is: "The current prefix is: It can even finish sen",
+  the response should be: "tences for you."
   
   The current prefix is: `;
 

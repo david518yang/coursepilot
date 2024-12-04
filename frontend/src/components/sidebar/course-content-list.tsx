@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, Ellipsis, Trash2, type LucideIcon } from 'lucide-react';
+import { BookOpen, Ellipsis, Trash2, SquarePen, type LucideIcon } from 'lucide-react';
 import { INoteDocument } from '@/lib/models/Note';
 import { useCoursesContext } from '@/lib/hooks/useCourseContext';
 import useSWR from 'swr';
@@ -73,7 +73,9 @@ export function CourseContentList() {
 
   const deleteItem = async (itemId: string, type: string) => {
     try {
-      const res = await fetch(`/api/courses/${selectedCourse}/${type}s/${itemId}`, {
+      type = type === 'pdf' ? 'documents/pdf' : `${type}s`;
+
+      const res = await fetch(`/api/courses/${selectedCourse}/${type}/${itemId}`, {
         method: 'DELETE',
       });
       if (!res.ok) {
@@ -100,9 +102,10 @@ export function CourseContentList() {
   };
 
   const iconMap: Record<string, LucideIcon> = {
-    note: FileText,
+    note: SquarePen,
     flashcard: Library,
     quiz: BookOpenCheck,
+    pdf: FileText,
   };
 
   return (

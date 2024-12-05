@@ -21,15 +21,16 @@ interface QuizQuestionsProps {
     questions: {
       question: string;
       format: string;
-      answers: any;
-      correctAnswer: any;
+      answers: AnswerType;
+      correctAnswer: CorrectAnswerType;
+      correctAnswers?: CorrectAnswerType[];
     }[];
   };
   courseId: string;
 }
 
 export function QuizQuestions({ quizData, courseId }: QuizQuestionsProps) {
-  const [userAnswers, setUserAnswers] = useState<Record<number, any>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<number, AnswerType>>({});
   const router = useRouter();
 
   const handleMultipleChoiceChange = (questionIndex: number, answer: string) => {
@@ -162,18 +163,21 @@ export function QuizQuestions({ quizData, courseId }: QuizQuestionsProps) {
               const results = await response.json();
 
               // Store quiz data and user answers separately
-              localStorage.setItem('quizData', JSON.stringify({
-                _id: quizData._id,
-                courseId: courseId,
-                questions: quizData.questions.map((q: any, index: number) => ({
-                  question: q.question,
-                  format: q.format,
-                  correctAnswer: q.correctAnswer,
-                  correctAnswers: q.correctAnswers,
-                  answers: q.answers,
-                  userAnswer: userAnswers[index]
-                }))
-              }));
+              localStorage.setItem(
+                'quizData',
+                JSON.stringify({
+                  _id: quizData._id,
+                  courseId: courseId,
+                  questions: quizData.questions.map((q, index: number) => ({
+                    question: q.question,
+                    format: q.format,
+                    correctAnswer: q.correctAnswer,
+                    correctAnswers: q.correctAnswers,
+                    answers: q.answers,
+                    userAnswer: userAnswers[index],
+                  })),
+                })
+              );
 
               // Redirect to results page with correct URL format
               router.push(`/courses/${courseId}/quizzes/${quizData._id}/results`);

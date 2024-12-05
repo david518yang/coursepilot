@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { QuizData } from '@/components/quiz/GenerateQuiz';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface QuizResults {
   quizData: QuizData;
@@ -32,7 +33,7 @@ export default function QuizResultsPage() {
   }, [params.courseId, params.quizId]);
 
   if (!results?.quizData?.questions) {
-    return <div>Loading results...</div>;
+    return <div className='flex w-full h-full justify-center items-center'>Loading results...</div>;
   }
 
   const { quizData } = results;
@@ -50,58 +51,63 @@ export default function QuizResultsPage() {
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
 
   return (
-    <div className='max-w-4xl mx-auto py-8 px-4'>
-      <div className='bg-white rounded-lg shadow-lg p-6 mb-8'>
-        <h1 className='text-2xl font-bold text-gray-800 mb-4'>Quiz Results</h1>
-        <div className='flex items-center justify-between mb-6'>
-          <div>
-            <p className='text-lg'>
-              Score:{' '}
-              <span className='font-semibold'>
-                {correctAnswers}/{totalQuestions}
-              </span>
-            </p>
-            <p className='text-lg'>
-              Percentage: <span className='font-semibold'>{percentage}%</span>
-            </p>
-          </div>
-          <div className={`text-2xl font-bold ${percentage >= 70 ? 'text-green-500' : 'text-red-500'}`}>
-            {percentage >= 70 ? 'PASSED' : 'FAILED'}
+    <div>
+      <div className='sticky top-0 h-11 p-2 border-b bg-sidebar'>
+        <SidebarTrigger />
+      </div>
+      <div className='max-w-4xl mx-auto py-8 px-4'>
+        <div className='bg-white rounded-lg shadow-lg p-6 mb-8'>
+          <h1 className='text-2xl font-bold text-gray-800 mb-4'>Quiz Results</h1>
+          <div className='flex items-center justify-between mb-6'>
+            <div>
+              <p className='text-lg'>
+                Score:{' '}
+                <span className='font-semibold'>
+                  {correctAnswers}/{totalQuestions}
+                </span>
+              </p>
+              <p className='text-lg'>
+                Percentage: <span className='font-semibold'>{percentage}%</span>
+              </p>
+            </div>
+            <div className={`text-2xl font-bold ${percentage >= 70 ? 'text-green-500' : 'text-red-500'}`}>
+              {percentage >= 70 ? 'PASSED' : 'FAILED'}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className='space-y-8'>
-        {quizData.questions.map((question, index) => {
-          const isCorrect = compareAnswers(
-            question.userAnswer,
-            question.correctAnswers || question.correctAnswer,
-            question.format
-          );
+        <div className='space-y-8'>
+          {quizData.questions.map((question, index) => {
+            const isCorrect = compareAnswers(
+              question.userAnswer,
+              question.correctAnswers || question.correctAnswer,
+              question.format
+            );
 
-          return (
-            <div
-              key={index}
-              className={`p-6 rounded-lg border ${
-                isCorrect ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'
-              }`}
-            >
-              <p className='font-semibold mb-2'>
-                {index + 1}. {question.question}
-              </p>
-              <div className='space-y-2'>
-                <p>
-                  <span className='font-medium'>Your Answer: </span>
-                  {formatAnswer(question.userAnswer, question.format)}
+            return (
+              <div
+                key={index}
+                className={`p-6 rounded-lg border ${
+                  isCorrect ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'
+                }`}
+              >
+                <p className='font-semibold mb-2'>
+                  {index + 1}. {question.question}
                 </p>
-                <p>
-                  <span className='font-medium'>Correct Answer: </span>
-                  {formatAnswer(question.correctAnswers || question.correctAnswer, question.format)}
-                </p>
+                <div className='space-y-2'>
+                  <p>
+                    <span className='font-medium'>Your Answer: </span>
+                    {formatAnswer(question.userAnswer, question.format)}
+                  </p>
+                  <p>
+                    <span className='font-medium'>Correct Answer: </span>
+                    {formatAnswer(question.correctAnswers || question.correctAnswer, question.format)}
+                  </p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

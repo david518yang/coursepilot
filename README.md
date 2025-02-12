@@ -11,7 +11,7 @@ by [Davis Banks](https://github.com/d5vis), [Lucian Prinz](https://github.com/lo
 
 ## Versions
 
-Production: [coursepilot](https://coursepilot-0373030cb9f8.herokuapp.com/)
+Production: [coursepilot]([https://coursepilot-0373030cb9f8.herokuapp.com/](https://coursepilot-c1t0bwttk-davids-projects-e8ff60e4.vercel.app/))
 
 ## Development
 

@@ -7,6 +7,8 @@
 
 <img alt="Static Badge" src="https://img.shields.io/badge/made%20with%20%3C3%20at-lmu-red?style=flat&labelColor=%230076A5&color=%23AB0C2F">
 
+![coursepilot-poster](https://github.com/user-attachments/assets/6da9154d-0513-4a9c-a689-5f1c27800dfb)
+
 by [Davis Banks](https://github.com/d5vis), [Lucian Prinz](https://github.com/loosh), and [David Yang](https://github.com/david518yang)
 
 ## Versions
